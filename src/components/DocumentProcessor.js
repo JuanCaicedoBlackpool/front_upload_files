@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { extractTextsFromAPI, sendToN8nWebhook } from '../services/api';
-import './DocumentProcessor.css';
+import '../css/DocumentProcessor.css';
+import ErrorModal from './ErrorModal';
+import useErrorModal from './useErrorModal';
 
 const DocumentProcessor = () => {
   const [formData, setFormData] = useState({
@@ -13,11 +15,13 @@ const DocumentProcessor = () => {
   const [useProductionUrl, setUseProductionUrl] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [emailError, setEmailError] = useState('');
+  const { error, showError, hideError } = useErrorModal();
 
- const validateEmail = (email) => {
+const validateEmail = (email) => {
   const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}))$/;
   return re.test(String(email).toLowerCase());
 };
+
 
 
   // Función para manejar cambios en los inputs
@@ -107,7 +111,7 @@ const DocumentProcessor = () => {
       console.log('Enviando datos al webhook...');
       const webhookResult = await sendToN8nWebhook(formData.email, formData.analysisType, extractedData, useProductionUrl);
       console.log('Proceso completado:', webhookResult);
-      alert('¡Documentos procesados exitosamente! Recibirás el análisis en tu correo.');
+      showError('default', '¡Documentos procesados exitosamente! Recibirás el análisis en tu correo.');
       
       
       // Limpiar formulario
@@ -126,7 +130,7 @@ const DocumentProcessor = () => {
       
     } catch (error) {
       console.error('Error en el proceso:', error);
-      alert(`Error al procesar documentos: ${error.message}`);
+      showError('server', `En este momento no es posible procesar los documentos. Por favor intenta más tarde.`);
     } finally {
       setIsLoading(false);
     }
@@ -136,17 +140,17 @@ const DocumentProcessor = () => {
   const handleSubmit = () => {
     // Validaciones
     if (!formData.email || !validateEmail(formData.email)) {
-      alert('Por favor ingresa un correo electrónico válido');
+      showError('email-invalid');
       return;
     }
 
     if (!formData.analysisType) {
-      alert('Por favor selecciona el tipo de análisis');
+      showError('validation', 'Por favor selecciona el tipo de análisis');
       return;
     }
 
     if (formData.files.length === 0) {
-      alert('Por favor selecciona al menos un documento');
+      showError('file-upload', 'Por favor selecciona al menos un documento');
       return;
     }
 
@@ -165,7 +169,7 @@ const DocumentProcessor = () => {
 
     for (let file of formData.files) {
       if (!allowedTypes.includes(file.type)) {
-        alert(`Tipo de archivo no permitido: ${file.name}`);
+        showError('file-type', `Tipo de archivo no permitido: ${file.name}`);
         return;
       }
     }
@@ -175,6 +179,12 @@ const DocumentProcessor = () => {
 
   return (
     <div className="container">
+      <ErrorModal 
+        isOpen={error.isOpen} 
+        onClose={hideError} 
+        errorType={error.type} 
+        customMessage={error.message} 
+      />
       <div className="form-container">
         
         <h1 className="title">
@@ -225,7 +235,10 @@ const DocumentProcessor = () => {
                 className="hidden-input"
               />
               <label htmlFor="documents" className="file-label-content">
-                <svg className="file-icon" xmlns="http://www.w3.org/2000/svg" width="50" height="43" viewBox="0 0 50 43"><path fill="#A78BFA" d="M48.4 26.5c-.8 0-1.5.7-1.5 1.5v9c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2v-9c0-.8-.7-1.5-1.5-1.5S0 27.2 0 28v9c0 2.8 2.2 5 5 5h40c2.8 0 5-2.2 5-5v-9c0-.8-.7-1.5-1.6-1.5z"/><path fill="#A78BFA" d="M24.2 1.5c-.4-.4-1-.4-1.4 0L11.3 13c-.4.4-.4 1 0 1.4.4.4 1 .4 1.4 0l10.8-10.8v28.9c0 .8.7 1.5 1.5 1.5s1.5-.7 1.5-1.5V3.6l10.8 10.8c.4.4 1 .4 1.4 0 .4-.4.4-1 0-1.4L24.2 1.5z"/></svg>
+                <svg className="file-icon" width="50" height="43" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M12.5535 2.49392C12.4114 2.33852 12.2106 2.25 12 2.25C11.7894 2.25 11.5886 2.33852 11.4465 2.49392L7.44648 6.86892C7.16698 7.17462 7.18822 7.64902 7.49392 7.92852C7.79963 8.20802 8.27402 8.18678 8.55352 7.88108L11.25 4.9318V16C11.25 16.4142 11.5858 16.75 12 16.75C12.4142 16.75 12.75 16.4142 12.75 16V4.9318L15.4465 7.88108C15.726 8.18678 16.2004 8.20802 16.5061 7.92852C16.8118 7.64902 16.833 7.17462 16.5535 6.86892L12.5535 2.49392Z" fill="#A78BFA"/>
+<path d="M3.75 15C3.75 14.5858 3.41422 14.25 3 14.25C2.58579 14.25 2.25 14.5858 2.25 15V15.0549C2.24998 16.4225 2.24996 17.5248 2.36652 18.3918C2.48754 19.2919 2.74643 20.0497 3.34835 20.6516C3.95027 21.2536 4.70814 21.5125 5.60825 21.6335C6.47522 21.75 7.57754 21.75 8.94513 21.75H15.0549C16.4225 21.75 17.5248 21.75 18.3918 21.6335C19.2919 21.5125 20.0497 21.2536 20.6517 20.6516C21.2536 20.0497 21.5125 19.2919 21.6335 18.3918C21.75 17.5248 21.75 16.4225 21.75 15.0549V15C21.75 14.5858 21.4142 14.25 21 14.25C20.5858 14.25 20.25 14.5858 20.25 15C20.25 16.4354 20.2484 17.4365 20.1469 18.1919C20.0482 18.9257 19.8678 19.3142 19.591 19.591C19.3142 19.8678 18.9257 20.0482 18.1919 20.1469C17.4365 20.2484 16.4354 20.25 15 20.25H9C7.56459 20.25 6.56347 20.2484 5.80812 20.1469C5.07435 20.0482 4.68577 19.8678 4.40901 19.591C4.13225 19.3142 3.9518 18.9257 3.85315 18.1919C3.75159 17.4365 3.75 16.4354 3.75 15Z" fill="#A78BFA"/>
+</svg>
                 <span>Arrastra y suelta archivos aquí, o haz clic para seleccionar archivos</span>
                 <span className="file-status">{fileStatus}</span>
               </label>

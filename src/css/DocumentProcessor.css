@@ -13,14 +13,13 @@
   max-width: 500px;
   border-radius: 24px;
   padding: 40px;
-  background: rgba(30, 27, 75, 0.8);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #f3f4f6;
+  border: 1px solid rgba(0, 0, 0, 0.1);
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 .title {
-  color: white;
+  color: #111827;
   font-size: 32px;
   font-weight: bold;
   text-align: center;
@@ -29,7 +28,7 @@
 }
 
 .subtitle {
-  color: #a78bfa;
+  color: #4b5563;
   text-align: center;
   margin-bottom: 40px;
   line-height: 1.6;
@@ -42,7 +41,7 @@
 
 .label {
   display: block;
-  color: white;
+  color: #111827;
   font-size: 16px;
   margin-bottom: 12px;
   font-weight: 500;
@@ -55,10 +54,10 @@
 .input {
   width: 100%;
   padding: 16px 20px;
-  background: rgba(30, 27, 75, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: #ffffff;
+  border: 1px solid #d1d5db;
   border-radius: 12px;
-  color: white;
+  color: #111827;
   font-size: 16px;
   transition: all 0.3s ease;
   outline: none;
@@ -68,17 +67,17 @@
   width: 100%;
   padding: 16px 20px;
   padding-right: 40px;
-  background: rgba(30, 27, 75, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: #ffffff;
+  border: 1px solid #d1d5db;
   border-radius: 12px;
-  color: white;
+  color: #111827;
   font-size: 16px;
   transition: all 0.3s ease;
   outline: none;
   cursor: pointer;
   -webkit-appearance: none;
   appearance: none;
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23a78bfa' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
   background-position: right 12px center;
   background-repeat: no-repeat;
   background-size: 16px;
@@ -91,17 +90,17 @@
   align-items: center;
   justify-content: center;
   padding: 32px;
-  border: 2px dashed rgba(255, 255, 255, 0.4);
+  border: 2px dashed #d1d5db;
   border-radius: 12px;
-  background-color: rgba(30, 27, 75, 0.6);
-  color: rgba(255, 255, 255, 0.7);
+  background-color: #ffffff;
+  color: #4b5563;
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
 
 .file-drop-zone.dragover {
-  background-color: rgba(55, 48, 163, 0.8);
-  border-color: #a78bfa;
+  background-color: #e5e7eb;
+  border-color: #f97316;
 }
 
 .file-label-content {
@@ -110,18 +109,19 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  color: white;
+  color: #111827;
   cursor: pointer;
 }
 
 .file-icon {
   margin-bottom: 16px;
+  color: #f97316;
 }
 
 .file-status {
   margin-top: 16px;
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.9);
+  color: #111827;
 }
 
 .button {
@@ -136,7 +136,7 @@
   transition: all 0.3s ease;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  background-color: #f97316;
 }
 
 .hidden-input {
@@ -146,11 +146,12 @@
 /* Hover and focus states */
 
 .input:focus, .select:focus {
-  border-color: #a78bfa;
-  box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.1);
+  border-color: #f97316;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
 }
 
 .button:hover {
+  background-color: #ea580c;
   transform: translateY(-2px);
   box-shadow: 0 10px 25px -5px rgba(249, 115, 22, 0.4);
 }
@@ -163,6 +164,7 @@
 .button:disabled:hover {
     transform: translateY(0);
     box-shadow: none;
+    background-color: #f97316;
 }
 
 .error-message {
