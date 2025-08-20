@@ -1,3 +1,4 @@
+
 .error-modal-overlay {
   position: fixed;
   top: 0;
@@ -8,89 +9,108 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 16px;
-}
-
-.error-modal-backdrop {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  cursor: pointer;
+  padding: 1rem;
+  background: rgba(10, 10, 20, 0.6);
+  backdrop-filter: blur(4px);
 }
 
 .error-modal-container {
-  position: relative;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  max-width: 448px;
   width: 100%;
-  padding: 24px;
+  max-width: 28rem; /* 448px */
+  border-radius: 1.5rem; /* 24px */
+  padding: 2.5rem; /* 40px */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(30, 27, 75, 0.85);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  position: relative;
   z-index: 51;
 }
 
-.error-icon-container {
+.icon-container {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 48px;
-  margin: 0 auto 16px auto;
-  background-color: #fee2e2;
+  width: 3rem; /* 48px */
+  height: 3rem; /* 48px */
+  margin: 0 auto 1rem auto;
   border-radius: 50%;
 }
 
+.error-icon-container {
+  background-color: rgba(248, 113, 113, 0.1);
+}
+
+.success-icon-container {
+  background-color: rgba(34, 197, 94, 0.1); /* Green background */
+}
+
 .error-icon {
-  width: 24px;
-  height: 24px;
-  color: #dc2626;
+  width: 1.5rem; /* 24px */
+  height: 1.5rem; /* 24px */
+  color: #e1892a;
+}
+
+.success-icon {
+  width: 1.5rem; /* 24px */
+  height: 1.5rem; /* 24px */
+  color: #22c55e; /* Green color */
 }
 
 .error-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #111827;
+  font-size: 1.5rem; /* 24px */
+  font-weight: 300;
+  color: #fff;
   text-align: center;
-  margin-bottom: 16px;
-  margin-top: 0;
+  margin: 0 0 1rem 0;
+  letter-spacing: 0.025em;
 }
 
 .error-message-modal {
-  color: #4b5563;
+  color: #c4b5fd;
   text-align: center;
-  margin-bottom: 24px;
-  line-height: 1.6;
-  margin-top: 0;
+  margin: 0 0 2rem 0;
+  line-height: 1.625;
 }
 
 .error-button {
   width: 100%;
-  background-color: #f97316;
-  color: white;
-  font-weight: 500;
-  padding: 12px 16px;
-  border-radius: 8px;
+  padding: 1rem 2rem;
   border: none;
+  border-radius: 0.75rem;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s ease;
-  font-size: 14px;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
 }
 
-.error-button:hover {
-  background-color: #ea580c;
+.error-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.error-button:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(249, 115, 22, 0.4);
 }
 
 .error-button:focus {
   outline: none;
-  box-shadow: 0 0 0 2px #f97316, 0 0 0 4px rgba(249, 115, 22, 0.2);
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.3);
 }
 
 @media (max-width: 640px) {
   .error-modal-container {
-    margin: 16px;
-    padding: 20px;
+    padding: 2rem;
+  }
+  .error-title {
+    font-size: 1.25rem;
+  }
+  .error-button {
+    padding: 0.875rem 1.5rem;
+    font-size: 0.875rem;
   }
 }

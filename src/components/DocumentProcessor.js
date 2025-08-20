@@ -3,6 +3,7 @@ import { extractTextsFromAPI, sendToN8nWebhook } from '../services/api';
 import '../css/DocumentProcessor.css';
 import ErrorModal from './ErrorModal';
 import useErrorModal from './useErrorModal';
+import LoadingModal from './LoadingModal';
 
 const DocumentProcessor = () => {
   const [formData, setFormData] = useState({
@@ -111,7 +112,7 @@ const validateEmail = (email) => {
       console.log('Enviando datos al webhook...');
       const webhookResult = await sendToN8nWebhook(formData.email, formData.analysisType, extractedData, useProductionUrl);
       console.log('Proceso completado:', webhookResult);
-      showError('default', '¡Documentos procesados exitosamente! Recibirás el análisis en tu correo.');
+      showError('success', '¡Documentos procesados exitosamente! Recibirás el análisis en tu correo.');
       
       
       // Limpiar formulario
@@ -179,6 +180,7 @@ const validateEmail = (email) => {
 
   return (
     <div className="container">
+      <LoadingModal isOpen={isLoading} />
       <ErrorModal 
         isOpen={error.isOpen} 
         onClose={hideError} 
@@ -259,8 +261,8 @@ const validateEmail = (email) => {
             >
               <option value="">Selecciona una opción...</option>
               <option value="Aprobación de credito">Aprobación de credito</option>
-              <option value="Validación hoja de vida">Validación hoja de vida</option>
-              <option value="Validación general">Validación general</option>
+              <option value="Análisis de postulación a cargo">Análisis de postulaciión a cargo</option>
+              <option value="Aprobación seguro de vida">Aprobación seguro de vida</option>
 
             </select>
           </div>
@@ -284,7 +286,7 @@ const validateEmail = (email) => {
             disabled={isLoading || !!emailError}
             className="button"
           >
-            {isLoading ? 'Procesando...' : 'Submit'}
+            Submit
           </button>
         </div>
       </div>
