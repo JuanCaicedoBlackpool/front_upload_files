@@ -1,8 +1,19 @@
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
-const LoadingModal = ({ isOpen }) => {
+const LoadingModal = ({ isOpen, isSuccess }) => {
+  const navigate = useNavigate();
+
   if (!isOpen) return null;
+
+  const handleNewAnalysis = () => {
+    navigate('/');
+  };
+
+  const handleViewResult = () => {
+    navigate('/analisys');
+  };
 
   return (
     <>
@@ -59,13 +70,64 @@ const LoadingModal = ({ isOpen }) => {
             font-weight: 500;
             color: #fff;
             text-align: center;
+            margin-bottom: 1.5rem;
+          }
+
+          .button-container {
+            display: flex;
+            gap: 1rem;
+          }
+
+          .modal-button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+          }
+
+          .new-analysis-button {
+            background-color: #4f46e5;
+            color: white;
+            border: 1px solid #4f46e5;
+          }
+
+          .new-analysis-button:hover {
+            background-color: #4338ca;
+          }
+
+          .view-result-button {
+            background-color: transparent;
+            color: #a78bfa;
+            border: 1px solid #a78bfa;
+          }
+
+          .view-result-button:hover {
+            background-color: rgba(167, 139, 250, 0.1);
           }
         `}
       </style>
       <div className="loading-modal-overlay">
         <div className="loading-modal-container">
-          <div className="loading-spinner"></div>
-          <p className="loading-text">Analizando documentos</p>
+          {!isSuccess ? (
+            <>
+              <div className="loading-spinner"></div>
+              <p className="loading-text">Analizando documentos</p>
+            </>
+          ) : (
+            <>
+              <p className="loading-text">Análisis completado</p>
+              <div className="button-container">
+                <button className="modal-button new-analysis-button" onClick={handleNewAnalysis}>
+                  Nuevo análisis
+                </button>
+                <button className="modal-button view-result-button" onClick={handleViewResult}>
+                  Ver resultado
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </>

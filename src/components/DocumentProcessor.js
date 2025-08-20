@@ -12,6 +12,7 @@ const DocumentProcessor = () => {
     files: []
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
   const [fileStatus, setFileStatus] = useState('No se han seleccionado archivos.');
   const [useProductionUrl, setUseProductionUrl] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -112,8 +113,7 @@ const validateEmail = (email) => {
       console.log('Enviando datos al webhook...');
       const webhookResult = await sendToN8nWebhook(formData.email, formData.analysisType, extractedData, useProductionUrl);
       console.log('Proceso completado:', webhookResult);
-      showError('success', '¡Documentos procesados exitosamente! Recibirás el análisis en tu correo.');
-      
+      setIsSuccess(true);
       
       // Limpiar formulario
       setFormData({
@@ -132,7 +132,6 @@ const validateEmail = (email) => {
     } catch (error) {
       console.error('Error en el proceso:', error);
       showError('server', `En este momento no es posible procesar los documentos. Por favor intenta más tarde.`);
-    } finally {
       setIsLoading(false);
     }
   };
@@ -179,8 +178,8 @@ const validateEmail = (email) => {
   };
 
   return (
-    <div className="container">
-      <LoadingModal isOpen={isLoading} />
+    <div className="DocumentProcessor_container">
+      <LoadingModal isOpen={isLoading} isSuccess={isSuccess} />
       <ErrorModal 
         isOpen={error.isOpen} 
         onClose={hideError} 

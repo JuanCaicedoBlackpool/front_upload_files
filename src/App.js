@@ -1,12 +1,9 @@
 import React from 'react';
-import DocumentProcessor from './components/DocumentProcessor';
-import './App.css';
+import AppRoutes from './routes/AppRoutes';
 
 function App() {
   return (
-    <div className="App">
-      <DocumentProcessor />
-    </div>
+      <AppRoutes />
   );
 }
 
