@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { extractTextsFromAPI, sendToN8nWebhook } from '../services/api';
 import '../css/DocumentProcessor.css';
 import ErrorModal from './ErrorModal';
 import useErrorModal from './useErrorModal';
 import LoadingModal from './LoadingModal';
+import { AnalysisContext } from '../context/AnalysisContext';
 
 const DocumentProcessor = () => {
   const [formData, setFormData] = useState({
@@ -14,16 +15,15 @@ const DocumentProcessor = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [fileStatus, setFileStatus] = useState('No se han seleccionado archivos.');
-  const [useProductionUrl, setUseProductionUrl] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [emailError, setEmailError] = useState('');
   const { error, showError, hideError } = useErrorModal();
+  const { setAnalysisResult } = useContext(AnalysisContext);
 
 const validateEmail = (email) => {
   const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}))$/;
   return re.test(String(email).toLowerCase());
 };
-
 
 
   // Función para manejar cambios en los inputs
@@ -58,10 +58,6 @@ const validateEmail = (email) => {
     } else {
       setFileStatus(`${files.length} archivos seleccionados`);
     }
-  };
-
-  const handleCheckboxChange = (e) => {
-    setUseProductionUrl(e.target.checked);
   };
 
   // Funciones para manejar el drag and drop
@@ -106,13 +102,15 @@ const validateEmail = (email) => {
   const processDocuments = async () => {
     try {
       setIsLoading(true);
+      setAnalysisResult(null);
       
       console.log('Extrayendo textos de documentos...');
       const extractedData = await extractTextsFromAPI(formData.files);
       
       console.log('Enviando datos al webhook...');
-      const webhookResult = await sendToN8nWebhook(formData.email, formData.analysisType, extractedData, useProductionUrl);
+      const webhookResult = await sendToN8nWebhook(formData.email, formData.analysisType, extractedData);
       console.log('Proceso completado:', webhookResult);
+      setAnalysisResult(webhookResult);
       setIsSuccess(true);
       
       // Limpiar formulario
@@ -191,7 +189,8 @@ const validateEmail = (email) => {
         <h1 className="title">
           Análisis de Documentos
         </h1>
-        
+        <img src="/3.png" alt="logo blackpool" className="logo-blackpool" />
+
         <p className="subtitle">
           Adjunta los documentos que requieras analizar y define el análisis que quieres recibir.
         </p>
@@ -249,7 +248,7 @@ const validateEmail = (email) => {
           {/* Campo Tipo de Análisis */}
           <div className="form-group">
             <label className="label">
-              Qué análisis deseas realizar de los documentos
+              ¿Qué análisis deseas realizar de los documentos?
             </label>
             <select
               name="analysisType"
@@ -260,22 +259,10 @@ const validateEmail = (email) => {
             >
               <option value="">Selecciona una opción...</option>
               <option value="Aprobación de credito">Aprobación de credito</option>
-              <option value="Análisis de postulación a cargo">Análisis de postulaciión a cargo</option>
+              <option value="Análisis de postulación a cargo">Análisis de postulación a cargo</option>
               <option value="Aprobación seguro de vida">Aprobación seguro de vida</option>
 
             </select>
-          </div>
-
-          {/* Production URL Checkbox */}
-          <div className="form-group">
-            <label className="label">
-              <input
-                type="checkbox"
-                checked={useProductionUrl}
-                onChange={handleCheckboxChange}
-              />
-              Usar URL de producción
-            </label>
           </div>
 
           {/* Botón Submit */}
@@ -285,7 +272,7 @@ const validateEmail = (email) => {
             disabled={isLoading || !!emailError}
             className="button"
           >
-            Submit
+            Analizar
           </button>
         </div>
       </div>

@@ -1,80 +1,103 @@
-/* ARCHIVO CSS COMPLETAMENTE LIMPIO - SIN REGLAS DE 3 COLUMNAS */
+/* DOCUMENTO ANALYSIS - ESTILOS CON NOMBRES ÚNICOS */
 
+/* Reset completo */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+}
+
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     line-height: 1.6;
     color: #fff;
+    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4c1d95 100%);
+    background-attachment: fixed;
     min-height: 100vh;
-    background: linear-gradient(135deg, #1e3a8a 0%, #7c3aed 50%, #7c2d92 100%);
 }
 
-.DocumentAnalysis_container {
+#root {
+    width: 100%;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+}
+
+.docAnalysis-container {
+    width: 100%;
+    min-height: 100vh;
     max-width: 1280px;
     margin: 0 auto;
     padding: 0 1.5rem;
 }
 
 /* Header Styles */
-.header {
+.docAnalysis-header {
     position: relative;
     overflow: hidden;
-    padding: 4rem 0;
+    padding: 2rem 2rem;
+    margin-bottom: 2rem;
+    margin-top: 2rem;
+    border-radius: 1.5rem;
 }
 
-.header::before {
+.docAnalysis-header::before {
     content: '';
     position: absolute;
     inset: 0;
     background: linear-gradient(90deg, rgba(59, 130, 246, 0.2) 0%, rgba(147, 51, 234, 0.2) 100%);
 }
 
-.header-content {
+.docAnalysis-headerContent {
     position: relative;
     text-align: center;
 }
 
-.header-icon {
+.docAnalysis-headerIcon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 5rem;
-    height: 5rem;
-    background: rgba(255, 255, 255, 0.1);
+    width: 2rem;
+    height: 2rem;
+    background: rgba(30, 27, 75, 0.8);
     border-radius: 50%;
     backdrop-filter: blur(8px);
-    margin-bottom: 1.5rem;
-}
-
-.header h1 {
-    font-size: clamp(2.5rem, 5vw, 4rem);
-    font-weight: 700;
     margin-bottom: 1rem;
 }
 
-.header p {
+.docAnalysis-headerTitle {
+    font-size: clamp(1rem, 5vw, 3rem);
+    font-weight: 500;
+    margin-bottom: 1rem;
+}
+
+.docAnalysis-headerSubtitle {
     font-size: 1.25rem;
-    color: #c7d2fe;
+    color: #c4b5fd;
     max-width: 32rem;
     margin: 0 auto;
 }
 
 /* Card Styles */
-.card {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(8px);
-    border-radius: 1rem;
+.docAnalysis-card {
+    background: rgba(30, 27, 75, 0.8);
+    backdrop-filter: blur(4px);
+    border-radius: 1.5rem;
     padding: 2rem;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     margin-bottom: 3rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
-.card-title {
+.docAnalysis-cardTitle {
     display: flex;
     align-items: center;
     font-size: 1.5rem;
@@ -82,48 +105,49 @@ body {
     margin-bottom: 1.5rem;
 }
 
-.card-title svg {
+.docAnalysis-cardTitle svg {
     margin-right: 0.75rem;
+    color: #a78bfa;
 }
 
 /* Personal Data Grid */
-.personal-data-grid {
+.docAnalysis-personalDataGrid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 1.5rem;
 }
 
-.data-field {
+.docAnalysis-dataField {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
 }
 
-.data-label {
-    color: #c7d2fe;
+.docAnalysis-dataLabel {
+    color: #c4b5fd;
     font-size: 0.875rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
 
-.data-value {
+.docAnalysis-dataValue {
     color: #fff;
     font-size: 1.125rem;
     font-weight: 500;
 }
 
 /* Document Analysis Grid */
-.documents-grid {
+.docAnalysis-documentsGrid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 1.5rem;
     margin-bottom: 3rem;
 }
 
-.document-card {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(8px);
+.docAnalysis-documentCard {
+    background: rgba(30, 27, 75, 0.6);
+    backdrop-filter: blur(4px);
     border-radius: 1rem;
     padding: 1.5rem;
     border: 1px solid rgba(255, 255, 255, 0.2);
@@ -131,19 +155,20 @@ body {
     height: 100%;
 }
 
-.document-card:hover {
-    background: rgba(255, 255, 255, 0.15);
+.docAnalysis-documentCard:hover {
+    background: rgba(55, 48, 163, 0.8);
+    border-color: #a78bfa;
     transform: scale(1.05);
 }
 
-.document-header {
+.docAnalysis-documentHeader {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
     margin-bottom: 1rem;
 }
 
-.document-title {
+.docAnalysis-documentTitle {
     display: flex;
     align-items: center;
     gap: 0.75rem;
@@ -151,7 +176,7 @@ body {
     font-size: 1.125rem;
 }
 
-.status-badge {
+.docAnalysis-statusBadge {
     display: inline-flex;
     align-items: center;
     padding: 0.25rem 0.75rem;
@@ -162,202 +187,125 @@ body {
     margin-bottom: 1rem;
 }
 
-.status-valid {
+/* Estados POSITIVOS - Verde */
+.docAnalysis-statusPositive, .docAnalysis-statusValid {
     background: rgba(34, 197, 94, 0.2);
     color: #86efac;
     border-color: rgba(34, 197, 94, 0.3);
 }
 
-.status-inconsistent {
+/* Estados NEGATIVOS - Rojo */
+.docAnalysis-statusNegative, .docAnalysis-statusInconsistent {
     background: rgba(239, 68, 68, 0.2);
     color: #fca5a5;
     border-color: rgba(239, 68, 68, 0.3);
 }
 
-.document-observations {
-    color: #c7d2fe;
+/* Estados NEUTROS - Violeta */
+.docAnalysis-statusNeutral {
+    background: rgba(167, 139, 250, 0.2);
+    color: #a78bfa;
+    border-color: rgba(167, 139, 250, 0.3);
+}
+
+.docAnalysis-documentObservations {
+    color: #c4b5fd;
     font-size: 0.875rem;
     line-height: 1.6;
 }
 
 /* Credit Result */
-.credit-result {
-    border-radius: 1rem;
+.docAnalysis-creditResult {
+    border-radius: 1.5rem;
     padding: 2rem;
     border: 2px solid;
     margin-bottom: 3rem;
 }
 
-.credit-result.denied {
+.docAnalysis-creditResultDenied {
     background: rgba(239, 68, 68, 0.2);
     border-color: rgba(239, 68, 68, 0.5);
 }
 
-.credit-result.approved {
+.docAnalysis-creditResultApproved {
     background: rgba(34, 197, 94, 0.2);
     border-color: rgba(34, 197, 94, 0.5);
 }
 
-.result-header {
+.docAnalysis-resultHeader {
     text-align: center;
     margin-bottom: 2rem;
 }
 
-.result-icon {
+.docAnalysis-resultIcon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 4rem;
-    height: 4rem;
+    width: 2rem;
+    height: 2rem;
     border-radius: 50%;
     margin-bottom: 1rem;
 }
 
-.result-icon.denied {
+.docAnalysis-resultIconDenied {
     background: rgba(239, 68, 68, 0.3);
+    color: #f87171;
 }
 
-.result-icon.approved {
+.docAnalysis-resultIconApproved {
     background: rgba(34, 197, 94, 0.3);
+    color: #22c55e;
 }
 
-.result-title {
+.docAnalysis-resultTitle {
     font-size: 1.875rem;
     font-weight: 700;
     margin-bottom: 0.5rem;
 }
 
-.result-status {
+.docAnalysis-resultStatus {
     display: inline-flex;
     align-items: center;
     padding: 0.75rem 1.5rem;
     border-radius: 9999px;
-    font-size: 1.25rem;
+    font-size: 1rem;
     font-weight: 700;
     border: 1px solid;
 }
 
-.result-status.denied {
+.docAnalysis-resultStatusDenied {
     background: rgba(239, 68, 68, 0.3);
     color: #fca5a5;
     border-color: rgba(239, 68, 68, 0.5);
 }
 
-.result-status.approved {
+.docAnalysis-resultStatusApproved {
     background: rgba(34, 197, 94, 0.3);
     color: #86efac;
     border-color: rgba(34, 197, 94, 0.5);
 }
 
-.result-details {
-    background: rgba(255, 255, 255, 0.1);
+.docAnalysis-resultDetails {
+    background: rgba(30, 27, 75, 0.6);
     border-radius: 0.75rem;
     padding: 1.5rem;
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(4px);
 }
 
-.result-details h3 {
+.docAnalysis-resultDetailsTitle {
     color: #fff;
     font-weight: 600;
     font-size: 1.125rem;
     margin-bottom: 1rem;
 }
 
-.result-details p {
-    color: #c7d2fe;
+.docAnalysis-resultDetailsText {
+    color: #c4b5fd;
     line-height: 1.6;
 }
 
-/* Recommendations */
-.recommendations {
-    background: rgba(59, 130, 246, 0.2);
-    backdrop-filter: blur(8px);
-    border-radius: 1rem;
-    padding: 2rem;
-    border: 1px solid rgba(59, 130, 246, 0.3);
-    margin-bottom: 3rem;
-}
-
-.recommendations h3 {
-    display: flex;
-    align-items: center;
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 1.5rem;
-}
-
-.recommendations h3 svg {
-    margin-right: 0.75rem;
-}
-
-.recommendation-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.recommendation-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.75rem;
-}
-
-.recommendation-bullet {
-    width: 0.5rem;
-    height: 0.5rem;
-    background: #60a5fa;
-    border-radius: 50%;
-    margin-top: 0.5rem;
-    flex-shrink: 0;
-}
-
-.recommendation-text {
-    color: #c7d2fe;
-}
-
-/* Footer */
-.footer {
-    margin-top: 4rem;
-    text-align: center;
-}
-
-.footer-card {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(8px);
-    border-radius: 1rem;
-    padding: 2rem;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.footer h3 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
-}
-
-.footer-contacts {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    gap: 2rem;
-    color: #c7d2fe;
-    margin-bottom: 1rem;
-}
-
-.contact-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.footer-note {
-    font-size: 0.875rem;
-    color: #a5b4fc;
-}
-
 /* Section Titles */
-.section-title {
+.docAnalysis-sectionTitle {
     font-size: 1.875rem;
     font-weight: 700;
     color: #fff;
@@ -366,51 +314,71 @@ body {
 }
 
 /* Icons (SVG) */
-.icon {
+.docAnalysis-icon {
     width: 1.5rem;
     height: 1.5rem;
     fill: currentColor;
 }
 
-.icon-lg {
-    width: 2rem;
-    height: 2rem;
+.docAnalysis-iconLg {
+    width: 1.5rem;
+    height: 1.5rem;
 }
 
-.icon-xl {
-    width: 2.5rem;
-    height: 2.5rem;
+.docAnalysis-iconXl {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+/* Back Button */
+.docAnalysis-backButton {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+    border: none;
+    color: #fff;
+    padding: 1rem 1.5rem;
+    border-radius: 0.75rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    box-shadow: 0 10px 25px -5px rgba(249, 115, 22, 0.4);
+}
+
+.docAnalysis-backButton:hover {
+    transform: translateY(-2px) scale(1.05);
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-    .personal-data-grid {
+    .docAnalysis-personalDataGrid {
         grid-template-columns: 1fr;
     }
     
-    .documents-grid {
+    .docAnalysis-documentsGrid {
         grid-template-columns: 1fr;
     }
     
-    .footer-contacts {
-        flex-direction: column;
-        gap: 1rem;
-    }
-    
-    .header {
+    .docAnalysis-header {
         padding: 2rem 0;
     }
     
-    .card {
+    .docAnalysis-card {
         padding: 1.5rem;
         margin-bottom: 2rem;
     }
     
-    .credit-result {
+    .docAnalysis-creditResult {
         padding: 1.5rem;
     }
     
-    .recommendations {
-        padding: 1.5rem;
+    .docAnalysis-backButton {
+        bottom: 1rem;
+        right: 1rem;
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
     }
 }

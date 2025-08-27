@@ -1,238 +1,270 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import { AnalysisContext } from '../context/AnalysisContext';
+import { useNavigate } from 'react-router-dom';
 import '../css/DocumentAnalisys.css';
 
-const DocumentAnalysis = () => {
-    return (
-        <>
-            {/* Header */}
-            <div className="header">
-                <div className="DocumentAnalysis_container">
-                    <div className="header-content">
-                        <div className="header-icon">
-                            <svg className="icon-xl" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                <polyline points="14,2 14,8 20,8"></polyline>
-                                <line x1="16" y1="13" x2="8" y2="13"></line>
-                                <line x1="16" y1="17" x2="8" y2="17"></line>
-                                <polyline points="10,9 9,9 8,9"></polyline>
+const DocumentAnalisys = () => {
+    const { analysisResult } = useContext(AnalysisContext);
+    const navigate = useNavigate();
+
+    // Función para determinar el estado basado en palabras clave
+    const getStatusClass = (estado) => {
+        if (!estado) return 'docAnalysis-statusNeutral';
+        
+        const estadoLower = estado.toLowerCase();
+        
+        // Estados POSITIVOS
+        const positiveKeywords = [
+            'apto', 'válido', 'valido', 'consistente', 'aprobado', 
+            'sin antecedentes', 'pagar seguro'
+        ];
+        
+        // Estados NEGATIVOS  
+        const negativeKeywords = [
+            'no apto', 'no válido', 'no valido', 'inconsistente', 'no aprobado',
+            'con antecedentes', 'no pagar seguro'
+        ];
+        
+        // Verificar estados negativos primero (más específicos)
+        if (negativeKeywords.some(keyword => estadoLower.includes(keyword))) {
+            return 'docAnalysis-statusNegative';
+        }
+        
+        // Luego verificar estados positivos
+        if (positiveKeywords.some(keyword => estadoLower.includes(keyword))) {
+            return 'docAnalysis-statusPositive';
+        }
+        
+        // Por defecto, neutral
+        return 'docAnalysis-statusNeutral';
+    };
+
+    // Función para determinar si el resultado general es positivo o negativo
+    const getResultClass = (estado) => {
+        if (!estado) return 'docAnalysis-creditResultApproved';
+        
+        const estadoLower = estado.toLowerCase();
+        const negativeStates = ['no apto', 'no aprobado', 'rechazado', 'denegado', 'con antecedentes', 'no pagar seguro'];
+        
+        return negativeStates.some(negative => estadoLower.includes(negative)) 
+            ? 'docAnalysis-creditResultDenied' 
+            : 'docAnalysis-creditResultApproved';
+    };
+
+    // Función para obtener el icono apropiado
+    const getStatusIcon = (estado) => {
+        const statusClass = getStatusClass(estado);
+        
+        if (statusClass === 'docAnalysis-statusNegative') {
+            return (
+                <svg className="docAnalysis-icon" viewBox="0 0 24 24" fill="currentColor" style={{marginRight: '0.5rem'}}>
+                    <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+            );
+        } else if (statusClass === 'docAnalysis-statusPositive') {
+            return (
+                <svg className="docAnalysis-icon" viewBox="0 0 24 24" fill="currentColor" style={{marginRight: '0.5rem'}}>
+                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            );
+        } else {
+            return (
+                <svg className="docAnalysis-icon" viewBox="0 0 24 24" fill="currentColor" style={{marginRight: '0.5rem'}}>
+                    <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            );
+        }
+    };
+    
+    // Verificación más robusta de los datos
+    if (!analysisResult) {
+        return (
+            <div className="docAnalysis-container">
+                <div className="docAnalysis-header">
+                    <div className="docAnalysis-headerContent">
+                        <div className="docAnalysis-headerIcon">
+                            <svg className="docAnalysis-iconXl" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
-                        <h1>Análisis de Documentos</h1>
-                        <p>Resultado completo del estudio crediticio y evaluación documental</p>
+                        <h1 className="docAnalysis-headerTitle">Análisis de Estudio</h1>
+                        <p className="docAnalysis-headerSubtitle">No hay datos de análisis para mostrar. Por favor, realiza un nuevo análisis.</p>
                     </div>
                 </div>
             </div>
+        );
+    }
 
-            <div className="DocumentAnalysis_container">
-                {/* Datos Personales */}
-                <div className="card">
-                    <h2 className="card-title">
-                        <svg className="icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="12" cy="7" r="4"></circle>
-                        </svg>
-                        Datos del Solicitante
-                    </h2>
-                    <div className="personal-data-grid">
-                        <div className="data-field">
-                            <p className="data-label">Nombres</p>
-                            <p className="data-value">David Alejandro</p>
-                        </div>
-                        <div className="data-field">
-                            <p className="data-label">Apellidos</p>
-                            <p className="data-value">Londoño Pardo</p>
-                        </div>
-                        <div className="data-field">
-                            <p className="data-label">Identificación</p>
-                            <p className="data-value">14.696.144</p>
-                        </div>
-                        <div className="data-field">
-                            <p className="data-label">Género</p>
-                            <p className="data-value">Masculino</p>
+    // Determinar si analysisResult es un array o un objeto
+    let analysis;
+    if (Array.isArray(analysisResult)) {
+        if (analysisResult.length === 0) {
+            return (
+                <div className="docAnalysis-container">
+                    <div className="docAnalysis-header">
+                        <div className="docAnalysis-headerContent">
+                            <div className="docAnalysis-headerIcon">
+                                <svg className="docAnalysis-iconXl" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                            </div>
+                            <h1 className="docAnalysis-headerTitle">Sin Datos</h1>
+                            <p className="docAnalysis-headerSubtitle">No hay datos de análisis para mostrar.</p>
                         </div>
                     </div>
                 </div>
+            );
+        }
+        analysis = analysisResult[0];
+    } else {
+        analysis = analysisResult;
+    }
 
-                {/* Análisis Documental */}
-                <h2 className="section-title">Resumen de Análisis Documental</h2>
-                <div className="documents-grid">
-                    <div className="document-card">
-                        <div className="document-header">
-                            <div className="document-title">
-                                <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                                    <polyline points="22,4 12,14.01 9,11.01"></polyline>
-                                </svg>
-                                <h3>Cédula de ciudadanía</h3>
-                            </div>
-                        </div>
-                        <div className="status-badge status-valid">VÁLIDO</div>
-                        <p className="document-observations">
-                            Documento vigente y coherente con los demás. Fecha de expedición 20-DIC-2000, sin fecha de vencimiento indicada.
-                        </p>
-                    </div>
-
-                    <div className="document-card">
-                        <div className="document-header">
-                            <div className="document-title">
-                                <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                                    <polyline points="22,4 12,14.01 9,11.01"></polyline>
-                                </svg>
-                                <h3>Colillas de pago</h3>
-                            </div>
-                        </div>
-                        <div className="status-badge status-valid">CONSISTENTE</div>
-                        <p className="document-observations">
-                            Ingresos netos de $3.590.000 (después de deducciones) durante mayo, junio y julio de 2025. Coherentes en montos y fechas recientes.
-                        </p>
-                    </div>
-
-                    <div className="document-card">
-                        <div className="document-header">
-                            <div className="document-title">
-                                <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <circle cx="12" cy="12" r="10"></circle>
-                                    <line x1="15" y1="9" x2="9" y2="15"></line>
-                                    <line x1="9" y1="9" x2="15" y2="15"></line>
-                                </svg>
-                                <h3>Carta de contador</h3>
-                            </div>
-                        </div>
-                        <div className="status-badge status-inconsistent">INCONSISTENTE</div>
-                        <p className="document-observations">
-                            Certifica ingresos promedio de $7.500.000, lo cual contradice las colillas de pago ($4.200.000 básicos). Fecha de emisión reciente (14 de julio de 2025).
-                        </p>
-                    </div>
-
-                    <div className="document-card">
-                        <div className="document-header">
-                            <div className="document-title">
-                                <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                                    <polyline points="22,4 12,14.01 9,11.01"></polyline>
-                                </svg>
-                                <h3>Carta laboral</h3>
-                            </div>
-                        </div>
-                        <div className="status-badge status-valid">CONSISTENTE</div>
-                        <p className="document-observations">
-                            Confirma salario básico de $4.200.000 y antigüedad laboral desde marzo de 2021. Coherente con colillas de pago.
-                        </p>
-                    </div>
-
-                    <div className="document-card">
-                        <div className="document-header">
-                            <div className="document-title">
-                                <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                                    <polyline points="22,4 12,14.01 9,11.01"></polyline>
-                                </svg>
-                                <h3>Escritura pública de inmueble</h3>
-                            </div>
-                        </div>
-                        <div className="status-badge status-valid">VÁLIDO</div>
-                        <p className="document-observations">
-                            Propiedad en Cali (Carrera 45 #12-34) adquirida en enero de 2023. Matrícula inmobiliaria clara y coherente con la identidad del solicitante.
-                        </p>
-                    </div>
-
-                    <div className="document-card">
-                        <div className="document-header">
-                            <div className="document-title">
-                                <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                                    <polyline points="22,4 12,14.01 9,11.01"></polyline>
-                                </svg>
-                                <h3>Reporte de scoring crediticio</h3>
-                            </div>
-                        </div>
-                        <div className="status-badge status-valid">VÁLIDO</div>
-                        <p className="document-observations">
-                            Puntaje de 720 (riesgo bajo). Capacidad de endeudamiento simulada de $120.000.000. Sin reportes negativos.
-                        </p>
-                    </div>
-                </div>
-
-                {/* Resultado del Crédito */}
-                <div className="credit-result denied">
-                    <div className="result-header">
-                        <div className="result-icon denied">
-                            <svg className="icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <line x1="15" y1="9" x2="9" y2="15"></line>
-                                <line x1="9" y1="9" x2="15" y2="15"></line>
+    // Verificar que el objeto analysis existe y tiene las propiedades esperadas
+    if (!analysis || typeof analysis !== 'object') {
+        return (
+            <div className="docAnalysis-container">
+                <div className="docAnalysis-header">
+                    <div className="docAnalysis-headerContent">
+                        <div className="docAnalysis-headerIcon">
+                            <svg className="docAnalysis-iconXl" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                             </svg>
                         </div>
-                        <h2 className="result-title">Resultado de Evaluación</h2>
-                        <div className="result-status denied">CRÉDITO NO APROBADO</div>
+                        <h1 className="docAnalysis-headerTitle">Error de Formato</h1>
+                        <p className="docAnalysis-headerSubtitle">Los datos de análisis no tienen el formato correcto.</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    const {
+        titulo,
+        Datos_personales,
+        Resumen_analisis_documental,
+        Resultado_estudio_credito,
+        Resultado
+    } = analysis;
+
+    // Usar Resultado si existe, sino Resultado_estudio_credito
+    const creditResult = Resultado || Resultado_estudio_credito;
+
+    return (
+        <div className="docAnalysis-container">
+            {/* Header */}
+            <div className="docAnalysis-header">
+                <div className="docAnalysis-headerContent">
+                    <div className="docAnalysis-headerIcon">
+                        <svg className="docAnalysis-iconXl" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <h1 className="docAnalysis-headerTitle">
+                        {titulo || 'Análisis'}
+                    </h1>
+                    <p className="docAnalysis-headerSubtitle">
+                        Resultados del procesamiento y análisis de documentos
+                    </p>
+                </div>
+            </div>
+
+             {/* Resultado del Estudio de Crédito */}
+            {creditResult && typeof creditResult === 'object' && (
+                <div className={`docAnalysis-creditResult ${getResultClass(creditResult.Estado)}`}>
+                    <div className="docAnalysis-resultHeader">
+                        <div className={`docAnalysis-resultIcon ${getResultClass(creditResult.Estado) === 'docAnalysis-creditResultDenied' ? 'docAnalysis-resultIconDenied' : 'docAnalysis-resultIconApproved'}`}>
+                            {getResultClass(creditResult.Estado) === 'docAnalysis-creditResultDenied' ? (
+                                <svg className="docAnalysis-iconLg" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            ) : (
+                                <svg className="docAnalysis-iconLg" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            )}
+                        </div>
+                        <h2 className="docAnalysis-resultTitle">Resultado del Estudio</h2>
+                        <div className={`docAnalysis-resultStatus ${getResultClass(creditResult.Estado) === 'docAnalysis-creditResultDenied' ? 'docAnalysis-resultStatusDenied' : 'docAnalysis-resultStatusApproved'}`}>
+                            {creditResult.Estado || 'No especificado'}
+                        </div>
                     </div>
                     
-                    <div className="result-details">
-                        <h3>Motivos de la Decisión:</h3>
-                        <p>
-                            Los ingresos comprobados mediante colillas de pago ($4.200.000 básicos / $3.590.000 netos) están por debajo del mínimo requerido de $5.000.000. Además, existe una inconsistencia grave entre la carta del contador ($7.500.000) y los documentos laborales/colillas. Aunque el solicitante cuenta con un inmueble como respaldo y un scoring crediticio favorable, la falta de capacidad de pago comprobada y las contradicciones en los ingresos impiden la aprobación del crédito.
+                    <div className="docAnalysis-resultDetails">
+                        <h3 className="docAnalysis-resultDetailsTitle">Detalles del Análisis</h3>
+                        <p className="docAnalysis-resultDetailsText">
+                            {creditResult.Motivos || 
+                             creditResult.Detalles || 
+                             creditResult.Observaciones || 
+                             'No se proporcionaron detalles adicionales.'}
                         </p>
                     </div>
                 </div>
+            )}
 
-                {/* Recomendaciones */}
-                <div className="recommendations">
-                    <h3>
-                        <svg className="icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <line x1="12" y1="8" x2="12" y2="12"></line>
-                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            {/* Datos Personales */}
+            {Datos_personales && typeof Datos_personales === 'object' && (
+                <div className="docAnalysis-card">
+                    <h3 className="docAnalysis-cardTitle">
+                        <svg className="docAnalysis-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
-                        Recomendaciones
+                        Datos Personales
                     </h3>
-                    <div className="recommendation-list">
-                        <div className="recommendation-item">
-                            <div className="recommendation-bullet"></div>
-                            <p className="recommendation-text">Revisar y corregir las inconsistencias en la documentación de ingresos presentada</p>
-                        </div>
-                        <div className="recommendation-item">
-                            <div className="recommendation-bullet"></div>
-                            <p className="recommendation-text">Su scoring crediticio es excelente - mantener este buen historial crediticio</p>
-                        </div>
-                        <div className="recommendation-item">
-                            <div className="recommendation-bullet"></div>
-                            <p className="recommendation-text">Considerar solicitar un monto de crédito acorde a su capacidad de pago actual demostrada</p>
-                        </div>
-                        <div className="recommendation-item">
-                            <div className="recommendation-bullet"></div>
-                            <p className="recommendation-text">Podrá aplicar nuevamente una vez cumplidos los requisitos mínimos de ingresos</p>
-                        </div>
+                    <div className="docAnalysis-personalDataGrid">
+                        {Object.entries(Datos_personales).map(([key, value]) => (
+                            <div key={key} className="docAnalysis-dataField">
+                                <div className="docAnalysis-dataLabel">
+                                    {key.replace(/_/g, ' ')}
+                                </div>
+                                <div className="docAnalysis-dataValue">
+                                    {value || 'No especificado'}
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
+            )}
 
-                {/* Footer */}
-                <div className="footer">
-                    <div className="footer-card">
-                        <h3>BANCO OCI-ORACLE</h3>
-                        <div className="footer-contacts">
-                            <div className="contact-item">
-                                <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-                                </svg>
-                                <span>(601) 123-4567</span>
+            {/* Resumen Análisis Documental */}
+            {Resumen_analisis_documental && Array.isArray(Resumen_analisis_documental) && (
+                <>
+                    <h2 className="docAnalysis-sectionTitle">Análisis de Documentos</h2>
+                    <div className="docAnalysis-documentsGrid">
+                        {Resumen_analisis_documental.map((doc, index) => (
+                            <div key={index} className="docAnalysis-documentCard">
+                                <div className="docAnalysis-documentHeader">
+                                    <div className="docAnalysis-documentTitle">
+                                        <svg className="docAnalysis-icon" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                        {doc?.Documento || 'Documento'}
+                                    </div>
+                                </div>
+                                
+                                <div className={`docAnalysis-statusBadge ${getStatusClass(doc?.Estado)}`}>
+                                    {getStatusIcon(doc?.Estado)}
+                                    {doc?.Estado || 'N/A'}
+                                </div>
+                                
+                                <div className="docAnalysis-documentObservations">
+                                    {doc?.Observaciones || 'Sin observaciones'}
+                                </div>
                             </div>
-                            <div className="contact-item">
-                                <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                                    <polyline points="22,6 12,13 2,6"></polyline>
-                                </svg>
-                                <span>creditos@oci-oracle.com</span>
-                            </div>
-                        </div>
-                        <p className="footer-note">
-                            Análisis generado automáticamente • Confidencial
-                        </p>
+                        ))}
                     </div>
-                </div>
-            </div>
-        </>
+                </>
+            )}
+
+            {/* Botón para volver */}
+            <button 
+                className="docAnalysis-backButton"
+                onClick={() => navigate('/')}
+            >
+                ← Nuevo Análisis
+            </button>
+        </div>
     );
 };
 
-export default DocumentAnalysis;
+export default DocumentAnalisys;

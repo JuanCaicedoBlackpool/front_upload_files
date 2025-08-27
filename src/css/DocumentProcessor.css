@@ -24,7 +24,7 @@
   font-size: 1.875rem; 
   font-weight: bold; 
   text-align: center;
-  margin-bottom: 1rem; 
+  margin-bottom: 0rem; 
   letter-spacing: 0.025em; 
 }
 
@@ -33,6 +33,14 @@
   text-align: center;
   margin-bottom: 2.5rem;
   line-height: 1.625;
+}
+
+.logo-blackpool {
+  display: block;
+  margin: 0 auto;
+  width: 150px;
+  margin-bottom: 1rem;
+  margin-top: 0.3rem;
 }
 
 
@@ -46,7 +54,7 @@
   color: #fff;
   font-size: 1rem; 
   font-weight: 500; 
-  margin-bottom: 0.75rem;
+  margin: 0.75rem;
 }
 
 .required {
@@ -157,4 +165,8 @@
   color: #f87171;
   font-size: 14px;
   margin-top: 8px;
+}
+
+.checkbox-input {
+  margin-right: 0.5rem;
 }

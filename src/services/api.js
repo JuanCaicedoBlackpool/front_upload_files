@@ -9,7 +9,7 @@ export const extractTextsFromAPI = async (files) => {
   });
 
   // Agregar parámetros adicionales según el curl
-  formDataAPI.append('use_genai', 'false');
+  formDataAPI.append('use_genai', 'true');
   formDataAPI.append('max_pages', '10');
 
   try {
@@ -36,7 +36,7 @@ export const extractTextsFromAPI = async (files) => {
   }
 };
 
-export const sendToN8nWebhook = async (email, analysisType, extractedData, useProductionUrl = false) => {
+export const sendToN8nWebhook = async (email, analysisType, extractedData) => {
   try {
     const webhookData = {
       email: email,
@@ -45,9 +45,7 @@ export const sendToN8nWebhook = async (email, analysisType, extractedData, usePr
       timestamp: new Date().toISOString()
     };
 
-    const webhookUrl = useProductionUrl
-      ? 'https://n8n.srv799706.hstgr.cloud/webhook/documents-reviewer'
-      : 'https://n8n.srv799706.hstgr.cloud/webhook-test/documents-reviewer';
+    const webhookUrl = 'https://n8n.srv799706.hstgr.cloud/webhook/documents-reviewer';
 
     const response = await fetch(webhookUrl, {
       method: 'POST',
