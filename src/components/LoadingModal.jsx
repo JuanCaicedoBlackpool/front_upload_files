@@ -1,17 +1,18 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const LoadingModal = ({ isOpen, isSuccess }) => {
+const LoadingModal = ({ isOpen, isSuccess, onClose }) => {
   const navigate = useNavigate();
 
   if (!isOpen) return null;
 
   const handleNewAnalysis = () => {
+    onClose();
     navigate('/');
   };
 
   const handleViewResult = () => {
+    onClose();
     navigate('/analisys');
   };
 
@@ -122,9 +123,9 @@ const LoadingModal = ({ isOpen, isSuccess }) => {
                 <button className="modal-button new-analysis-button" onClick={handleNewAnalysis}>
                   Nuevo análisis
                 </button>
-                <button className="modal-button view-result-button" onClick={handleViewResult}>
+                {/* <button className="modal-button view-result-button" onClick={handleViewResult}>
                   Ver resultado
-                </button>
+                </button> */}
               </div>
             </>
           )}

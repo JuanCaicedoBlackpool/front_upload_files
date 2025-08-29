@@ -9,9 +9,9 @@ import { AnalysisContext } from '../context/AnalysisContext';
 const DocumentProcessor = () => {
   const [formData, setFormData] = useState({
     email: '',
-    analysisType: '',
     files: []
   });
+  const [useProductionUrl, setUseProductionUrl] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [fileStatus, setFileStatus] = useState('No se han seleccionado archivos.');
@@ -20,10 +20,16 @@ const DocumentProcessor = () => {
   const { error, showError, hideError } = useErrorModal();
   const { setAnalysisResult } = useContext(AnalysisContext);
 
+  const handleCloseModal = () => {
+    setIsLoading(false);
+    setIsSuccess(false);
+  };
+
 const validateEmail = (email) => {
   const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}))$/;
   return re.test(String(email).toLowerCase());
 };
+
 
 
   // Función para manejar cambios en los inputs
@@ -108,7 +114,7 @@ const validateEmail = (email) => {
       const extractedData = await extractTextsFromAPI(formData.files);
       
       console.log('Enviando datos al webhook...');
-      const webhookResult = await sendToN8nWebhook(formData.email, formData.analysisType, extractedData);
+      const webhookResult = await sendToN8nWebhook(formData.email, useProductionUrl, extractedData);
       console.log('Proceso completado:', webhookResult);
       setAnalysisResult(webhookResult);
       setIsSuccess(true);
@@ -116,7 +122,6 @@ const validateEmail = (email) => {
       // Limpiar formulario
       setFormData({
         email: '',
-        analysisType: '',
         files: []
       });
       setFileStatus('No se han seleccionado archivos.');
@@ -139,11 +144,6 @@ const validateEmail = (email) => {
     // Validaciones
     if (!formData.email || !validateEmail(formData.email)) {
       showError('email-invalid');
-      return;
-    }
-
-    if (!formData.analysisType) {
-      showError('validation', 'Por favor selecciona el tipo de análisis');
       return;
     }
 
@@ -177,7 +177,7 @@ const validateEmail = (email) => {
 
   return (
     <div className="DocumentProcessor_container">
-      <LoadingModal isOpen={isLoading} isSuccess={isSuccess} />
+      <LoadingModal isOpen={isLoading} isSuccess={isSuccess} onClose={handleCloseModal} />
       <ErrorModal 
         isOpen={error.isOpen} 
         onClose={hideError} 
@@ -187,9 +187,12 @@ const validateEmail = (email) => {
       <div className="form-container">
         
         <h1 className="title">
-          Análisis de Documentos
+          Documentos de entrenamiento
         </h1>
-        <img src="/3.png" alt="logo blackpool" className="logo-blackpool" />
+        <div className="logo-container">
+          <img src="/3.png" alt="logo blackpool" className="logo" />
+          <img src="/Oracle-Logo-1.png" alt="logo oracle" className="logo" />
+        </div>
 
         <p className="subtitle">
           Adjunta los documentos que requieras analizar y define el análisis que quieres recibir.
@@ -245,24 +248,16 @@ const validateEmail = (email) => {
             </div>
           </div>
 
-          {/* Campo Tipo de Análisis */}
           <div className="form-group">
-            <label className="label">
-              ¿Qué análisis deseas realizar de los documentos?
+            <label className="label-checkbox">
+              <input
+                type="checkbox"
+                checked={useProductionUrl}
+                onChange={() => setUseProductionUrl(!useProductionUrl)}
+                className="checkbox-input"
+              />
+              URL Produccion
             </label>
-            <select
-              name="analysisType"
-              value={formData.analysisType}
-              onChange={handleInputChange}
-              required
-              className="select"
-            >
-              <option value="">Selecciona una opción...</option>
-              <option value="Aprobación de credito">Aprobación de credito</option>
-              <option value="Análisis de postulación a cargo">Análisis de postulación a cargo</option>
-              <option value="Aprobación seguro de vida">Aprobación seguro de vida</option>
-
-            </select>
           </div>
 
           {/* Botón Submit */}

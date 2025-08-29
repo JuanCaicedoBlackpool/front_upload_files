@@ -36,16 +36,20 @@ export const extractTextsFromAPI = async (files) => {
   }
 };
 
-export const sendToN8nWebhook = async (email, analysisType, extractedData) => {
+export const sendToN8nWebhook = async (email, useProductionUrl, extractedData) => {
   try {
     const webhookData = {
       email: email,
-      analysisType: analysisType,
       extractedTexts: extractedData,
       timestamp: new Date().toISOString()
     };
 
-    const webhookUrl = 'https://n8n.srv799706.hstgr.cloud/webhook/documents-reviewer';
+    let webhookUrl;
+    if (useProductionUrl) {
+      webhookUrl = 'https://n8n.srv799706.hstgr.cloud/webhook/analizador-docs-2';
+    } else {
+      webhookUrl = 'https://n8n.srv799706.hstgr.cloud/webhook-test/analizador-docs-2';
+    }
 
     const response = await fetch(webhookUrl, {
       method: 'POST',
