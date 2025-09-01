@@ -114,11 +114,11 @@ const LoadingModal = ({ isOpen, isSuccess, onClose }) => {
           {!isSuccess ? (
             <>
               <div className="loading-spinner"></div>
-              <p className="loading-text">Analizando documentos</p>
+              <p className="loading-text">Procesando documentos</p>
             </>
           ) : (
             <>
-              <p className="loading-text">Análisis completado</p>
+              <p className="loading-text">Documentos procesados</p>
               <div className="button-container">
                 <button className="modal-button new-analysis-button" onClick={handleNewAnalysis}>
                   Nuevo análisis

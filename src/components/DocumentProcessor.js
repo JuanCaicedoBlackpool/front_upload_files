@@ -199,28 +199,10 @@ const validateEmail = (email) => {
         </p>
         
         <div>
-          
-          {/* Campo Email */}
-          <div className="form-group">
-            <label className="label">
-              Ingresa el correo donde quieres recibir el informe <span className="required">*</span>
-            </label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              placeholder="tu-email@ejemplo.com"
-              required
-              className="input"
-            />
-            {emailError && <p className="error-message">{emailError}</p>}
-          </div>
-
           {/* Campo Archivos */}
           <div className="form-group">
             <label className="label">
-              Adjunta los documentos que quieres analizar
+              Adjunta los documentos que quieres procesar
             </label>
             <div 
               className={`file-drop-zone ${isDragging ? 'dragover' : ''}`}
@@ -267,7 +249,7 @@ const validateEmail = (email) => {
             disabled={isLoading || !!emailError}
             className="button"
           >
-            Analizar
+            Procesar
           </button>
         </div>
       </div>
