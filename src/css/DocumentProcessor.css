@@ -11,7 +11,7 @@
 
 .form-container {
   width: 100%;
-  max-width: 32rem;
+  max-width: 38rem;
   border-radius: 1.5rem;
   padding: 2.5rem;
   backdrop-filter: blur(4px);
@@ -143,8 +143,8 @@
 }
 
 .button {
-  width: 100%;
-  padding: 1.25rem 2rem;
+  width: 60%;
+  padding: 1rem 1rem;
   border: none;
   border-radius: 0.75rem;
   color: #fff;
@@ -155,6 +155,8 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  display: block;     
+  margin: 0 auto;      
 }
 
 .button:disabled {
@@ -175,4 +177,79 @@
 
 .checkbox-input {
   margin-right: 0.5rem;
+}
+
+/* Document list styles */
+.document-list {
+  margin-bottom: 1.5rem;
+}
+
+.document-list-title {
+  color: #fff;
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.document-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.document-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: rgba(30, 27, 75, 0.6);
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.document-info {
+  flex: 1;
+}
+
+.document-name {
+  color: #fff;
+  font-weight: 500;
+}
+
+.document-size {
+  color: #c4b5fd;
+  font-size: 0.875rem;
+}
+
+.document-type-select {
+  padding: 0.5rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 0.875rem;
+  background-color: rgba(30, 27, 75, 0.8);
+  outline: none;
+  min-width: 200px;
+}
+
+.document-type-select:focus {
+  border-color: #a78bfa;
+  box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.1);
+}
+
+.remove-document-btn {
+  padding: 0.5rem;
+  color: #f87171;
+  background: transparent;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.remove-document-btn:hover {
+  background-color: rgba(248, 113, 113, 0.1);
 }

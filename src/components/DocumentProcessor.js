@@ -12,45 +12,83 @@ const DocumentProcessor = () => {
     analysisType: "",
     files: [],
   });
+  
+  const [uploadedDocuments, setUploadedDocuments] = useState([]);
+  
+  const documentTypes = [
+    "Cédula",
+    "Formato de preclasificación",
+    "Estado de cuenta",
+    "Reporte de crédito"
+  ];
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [fileStatus, setFileStatus] = useState(
     "No se han seleccionado archivos.",
   );
   const [isDragging, setIsDragging] = useState(false);
-  const [emailError, setEmailError] = useState("");
   const { error, showError, hideError } = useErrorModal();
   const { setAnalysisResult } = useContext(AnalysisContext);
 
-  const validateEmail = (email) => {
-    const re =
-      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}))$/;
-    return re.test(String(email).toLowerCase());
+
+  // Función para formatear el tamaño del archivo
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
-  // Función para manejar cambios en los inputs
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
+  // Función para actualizar el tipo de documento
+  const updateDocumentType = (id, type) => {
+    setUploadedDocuments(prevDocs =>
+      prevDocs.map(doc =>
+        doc.id === id ? { ...doc, type } : doc
+      )
+    );
+    
+    // También actualizar los archivos en formData
+    const updatedFiles = uploadedDocuments
+      .map(doc => doc.id === id ? { ...doc, type } : doc)
+      .filter(doc => doc.type); // Solo incluir documentos con tipo asignado
+      
+    setFormData(prev => ({
       ...prev,
-      [name]: value,
+      files: updatedFiles,
     }));
+  };
 
-    if (name === "email") {
-      if (!validateEmail(value)) {
-        setEmailError("Por favor ingresa un email válido.");
-      } else {
-        setEmailError("");
-      }
+  // Función para eliminar un documento
+  const removeDocument = (id) => {
+    setUploadedDocuments(prevDocs => prevDocs.filter(doc => doc.id !== id));
+    setFormData(prev => ({
+      ...prev,
+      files: prev.files.filter(file => file.id !== id),
+    }));
+    
+    if (uploadedDocuments.length <= 1) {
+      setFileStatus("No se han seleccionado archivos.");
+    } else {
+      setFileStatus(`${uploadedDocuments.length - 1} archivos seleccionados`);
     }
   };
 
   // Función para manejar selección de archivos
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
-    setFormData((prev) => ({
+    const newDocuments = files.map(file => ({
+      id: Math.random().toString(36).substr(2, 9),
+      file,
+      name: file.name,
+      size: file.size,
+      type: ""
+    }));
+
+    setUploadedDocuments(prev => [...prev, ...newDocuments]);
+    setFormData(prev => ({
       ...prev,
-      files: files,
+      files: [...prev.files, ...newDocuments],
     }));
 
     if (files.length === 0) {
@@ -145,7 +183,7 @@ const DocumentProcessor = () => {
   // Función para manejar el envío del formulario
   const handleSubmit = () => {
     // Validaciones
-    if (!formData.email || !validateEmail(formData.email)) {
+    if (!formData.email ) {
       showError("email-invalid");
       return;
     }
@@ -155,8 +193,15 @@ const DocumentProcessor = () => {
       return;
     }
 
-    if (formData.files.length === 0) {
+    if (uploadedDocuments.length === 0) {
       showError("file-upload", "Por favor selecciona al menos un documento");
+      return;
+    }
+
+    // Verificar que todos los documentos tengan un tipo asignado
+    const documentsWithoutType = uploadedDocuments.filter(doc => !doc.type);
+    if (documentsWithoutType.length > 0) {
+      showError("file-type", "Por favor asigna un tipo a todos los documentos");
       return;
     }
 
@@ -214,24 +259,6 @@ const DocumentProcessor = () => {
         </p>
 
         <div>
-          {/* Campo Email */}
-          <div className="form-group">
-            <label className="label">
-              Ingresa el correo donde quieres recibir el informe{" "}
-              <span className="required">*</span>
-            </label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              placeholder="tu-email@ejemplo.com"
-              required
-              className="input"
-            />
-            {emailError && <p className="error-message">{emailError}</p>}
-          </div>
-
           {/* Campo Archivos */}
           <div className="form-group">
             <label className="label">
@@ -279,36 +306,46 @@ const DocumentProcessor = () => {
             </div>
           </div>
 
-          {/* Campo Tipo de Análisis */}
-          <div className="form-group">
-            <label className="label">
-              ¿Qué análisis deseas realizar de los documentos?
-            </label>
-            <select
-              name="analysisType"
-              value={formData.analysisType}
-              onChange={handleInputChange}
-              required
-              className="select"
-            >
-              <option value="">Selecciona una opción...</option>
-              <option value="Aprobación de credito">
-                Aprobación de credito
-              </option>
-              <option value="Análisis de postulación a cargo">
-                Análisis de postulación a cargo
-              </option>
-              <option value="Aprobación seguro de vida">
-                Aprobación seguro de vida
-              </option>
-            </select>
-          </div>
+          {/* Lista de Documentos */}
+          {uploadedDocuments.length > 0 && (
+            <div className="document-list">
+              <h3 className="document-list-title">Documentos Subidos</h3>
+              <div className="document-list-container">
+                {uploadedDocuments.map(doc => (
+                  <div key={doc.id} className="document-item">
+                    <div className="document-info">
+                      <p className="document-name">{doc.name}</p>
+                      <p className="document-size">{formatFileSize(doc.size)}</p>
+                    </div>
+                    <select
+                      value={doc.type}
+                      onChange={(e) => updateDocumentType(doc.id, e.target.value)}
+                      className="document-type-select"
+                    >
+                      <option value="">Seleccionar tipo</option>
+                      {documentTypes.map(type => (
+                        <option key={type} value={type}>{type}</option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={() => removeDocument(doc.id)}
+                      className="remove-document-btn"
+                      aria-label="Eliminar documento"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
 
           {/* Botón Submit */}
           <button
             type="button"
             onClick={handleSubmit}
-            disabled={isLoading || !!emailError}
+            disabled={isLoading }
             className="button"
           >
             Analizar
