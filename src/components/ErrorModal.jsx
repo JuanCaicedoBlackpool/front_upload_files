@@ -6,7 +6,6 @@ const ErrorModal = ({ isOpen, onClose, errorType, customMessage }) => {
 
   const errorMessages = {
     'file-upload': 'Error al subir los archivos. Verifica que los archivos sean válidos y no excedan el tamaño permitido.',
-    'email-invalid': 'El correo electrónico ingresado no es válido. Por favor, verifica e intenta nuevamente.',
     'network': 'Error de conexión. Verifica tu conexión a internet e intenta nuevamente.',
     'server': 'Error del servidor. Por favor, intenta nuevamente en unos momentos.',
     'validation': 'Por favor, completa todos los campos requeridos antes de continuar.',

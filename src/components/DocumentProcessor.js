@@ -7,16 +7,12 @@ import LoadingModal from './LoadingModal';
 import { AnalysisContext } from '../context/AnalysisContext';
 
 const DocumentProcessor = () => {
-  const [formData, setFormData] = useState({
-    email: '',
-    files: []
-  });
+  const [files, setFiles] = useState([]);
   const [useProductionUrl, setUseProductionUrl] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [fileStatus, setFileStatus] = useState('No se han seleccionado archivos.');
   const [isDragging, setIsDragging] = useState(false);
-  const [emailError, setEmailError] = useState('');
   const { error, showError, hideError } = useErrorModal();
   const { setAnalysisResult } = useContext(AnalysisContext);
 
@@ -25,44 +21,17 @@ const DocumentProcessor = () => {
     setIsSuccess(false);
   };
 
-const validateEmail = (email) => {
-  const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}))$/;
-  return re.test(String(email).toLowerCase());
-};
-
-
-
-  // Función para manejar cambios en los inputs
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-
-    if (name === 'email') {
-      if (!validateEmail(value)) {
-        setEmailError('Por favor ingresa un email válido.');
-      } else {
-        setEmailError('');
-      }
-    }
-  };
-
   // Función para manejar selección de archivos
   const handleFileChange = (e) => {
-    const files = Array.from(e.target.files);
-    setFormData(prev => ({
-      ...prev,
-      files: files
-    }));
+    const newFiles = Array.from(e.target.files);
+    setFiles(newFiles);
 
-    if (files.length === 0) {
+    if (newFiles.length === 0) {
       setFileStatus('No se han seleccionado archivos.');
-    } else if (files.length === 1) {
-      setFileStatus(files[0].name);
+    } else if (newFiles.length === 1) {
+      setFileStatus(newFiles[0].name);
     } else {
-      setFileStatus(`${files.length} archivos seleccionados`);
+      setFileStatus(`${newFiles.length} archivos seleccionados`);
     }
   };
 
@@ -89,18 +58,15 @@ const validateEmail = (email) => {
     e.stopPropagation();
     setIsDragging(false);
 
-    const files = Array.from(e.dataTransfer.files);
-    setFormData(prev => ({
-        ...prev,
-        files: files
-    }));
+    const newFiles = Array.from(e.dataTransfer.files);
+    setFiles(newFiles);
 
-    if (files.length === 0) {
-        setFileStatus('No se han seleccionado archivos.');
-    } else if (files.length === 1) {
-        setFileStatus(files[0].name);
+    if (newFiles.length === 0) {
+        setFileStatus('No se han seleccionados archivos.');
+    } else if (newFiles.length === 1) {
+        setFileStatus(newFiles[0].name);
     } else {
-        setFileStatus(`${files.length} archivos seleccionados`);
+        setFileStatus(`${newFiles.length} archivos seleccionados`);
     }
   };
 
@@ -111,19 +77,16 @@ const validateEmail = (email) => {
       setAnalysisResult(null);
       
       console.log('Extrayendo textos de documentos...');
-      const extractedData = await extractTextsFromAPI(formData.files);
+      const extractedData = await extractTextsFromAPI(files);
       
       console.log('Enviando datos al webhook...');
-      const webhookResult = await sendToN8nWebhook(formData.email, useProductionUrl, extractedData);
+      const webhookResult = await sendToN8nWebhook(useProductionUrl, extractedData);
       console.log('Proceso completado:', webhookResult);
       setAnalysisResult(webhookResult);
       setIsSuccess(true);
       
       // Limpiar formulario
-      setFormData({
-        email: '',
-        files: []
-      });
+      setFiles([]);
       setFileStatus('No se han seleccionado archivos.');
       
       // Limpiar el input de archivos
@@ -142,12 +105,7 @@ const validateEmail = (email) => {
   // Función para manejar el envío del formulario
   const handleSubmit = () => {
     // Validaciones
-    if (!formData.email || !validateEmail(formData.email)) {
-      showError('email-invalid');
-      return;
-    }
-
-    if (formData.files.length === 0) {
+    if (files.length === 0) {
       showError('file-upload', 'Por favor selecciona al menos un documento');
       return;
     }
@@ -165,7 +123,7 @@ const validateEmail = (email) => {
       'image/png'
     ];
 
-    for (let file of formData.files) {
+    for (let file of files) {
       if (!allowedTypes.includes(file.type)) {
         showError('file-type', `Tipo de archivo no permitido: ${file.name}`);
         return;
@@ -246,7 +204,7 @@ const validateEmail = (email) => {
           <button
             type="button"
             onClick={handleSubmit}
-            disabled={isLoading || !!emailError}
+            disabled={isLoading}
             className="button"
           >
             Procesar

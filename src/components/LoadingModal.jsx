@@ -11,11 +11,6 @@ const LoadingModal = ({ isOpen, isSuccess, onClose }) => {
     navigate('/');
   };
 
-  const handleViewResult = () => {
-    onClose();
-    navigate('/analisys');
-  };
-
   return (
     <>
       <style>
@@ -123,9 +118,6 @@ const LoadingModal = ({ isOpen, isSuccess, onClose }) => {
                 <button className="modal-button new-analysis-button" onClick={handleNewAnalysis}>
                   Nuevo análisis
                 </button>
-                {/* <button className="modal-button view-result-button" onClick={handleViewResult}>
-                  Ver resultado
-                </button> */}
               </div>
             </>
           )}

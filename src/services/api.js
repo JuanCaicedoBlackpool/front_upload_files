@@ -36,10 +36,9 @@ export const extractTextsFromAPI = async (files) => {
   }
 };
 
-export const sendToN8nWebhook = async (email, useProductionUrl, extractedData) => {
+export const sendToN8nWebhook = async (useProductionUrl, extractedData) => {
   try {
     const webhookData = {
-      email: email,
       extractedTexts: extractedData,
       timestamp: new Date().toISOString()
     };
