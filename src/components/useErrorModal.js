@@ -1,25 +1,25 @@
-import { useState } from 'react';
+import { useState } from "react";
 
 const useErrorHandler = () => {
   const [error, setError] = useState({
     isOpen: false,
-    type: '',
-    message: ''
+    type: "",
+    message: "",
   });
 
-  const showError = (errorType, customMessage = '') => {
+  const showError = (errorType, customMessage = "") => {
     setError({
       isOpen: true,
       type: errorType,
-      message: customMessage
+      message: customMessage,
     });
   };
 
   const hideError = () => {
     setError({
       isOpen: false,
-      type: '',
-      message: ''
+      type: "",
+      message: "",
     });
   };
 
