@@ -22,6 +22,7 @@ const DocumentAnalisys = () => {
       "aprobado",
       "sin antecedentes",
       "pagar seguro",
+      "viable",
     ];
 
     // Estados NEGATIVOS
@@ -33,6 +34,7 @@ const DocumentAnalisys = () => {
       "no aprobado",
       "con antecedentes",
       "no pagar seguro",
+      "no viable",
     ];
 
     // Verificar estados negativos primero (más específicos)
@@ -61,6 +63,7 @@ const DocumentAnalisys = () => {
       "denegado",
       "con antecedentes",
       "no pagar seguro",
+      "no viable",
     ];
 
     return negativeStates.some((negative) => estadoLower.includes(negative))
@@ -191,15 +194,12 @@ const DocumentAnalisys = () => {
   }
 
   const {
-    titulo,
+    Banco,
     Datos_personales,
-    Resumen_analisis_documental,
-    Resultado_estudio_credito,
+    Criterios,
+    Analisis_crediticio,
     Resultado,
   } = analysis;
-
-  // Usar Resultado si existe, sino Resultado_estudio_credito
-  const creditResult = Resultado || Resultado_estudio_credito;
 
   return (
     <div className="docAnalysis-container">
@@ -210,46 +210,22 @@ const DocumentAnalisys = () => {
             <img src="/3.png" alt="logo blackpool" className="logo" />
             <img src="/Oracle-Logo-1.png" alt="logo oracle" className="logo" />
           </div>
-          <h1 className="docAnalysis-headerTitle">{titulo || "Análisis"}</h1>
-          <p className="docAnalysis-headerSubtitle">
-            Resultados del procesamiento y análisis de documentos
-          </p>
+          <h1 className="docAnalysis-headerTitle">Análisis de viabilidad crediticio</h1>
         </div>
       </div>
 
       {/* Resultado del Estudio de Crédito */}
-      {creditResult && typeof creditResult === "object" && (
+      {Resultado && (
         <div
-          className={`docAnalysis-creditResult ${getResultClass(creditResult.Estado)}`}
+          className={`docAnalysis-creditResult ${getResultClass(Resultado.Estado)}`}
         >
           <div className="docAnalysis-resultHeader">
-            <div
-              className={`docAnalysis-resultIcon ${getResultClass(creditResult.Estado) === "docAnalysis-creditResultDenied" ? "docAnalysis-resultIconDenied" : "docAnalysis-resultIconApproved"}`}
-            >
-              {getResultClass(creditResult.Estado) ===
-              "docAnalysis-creditResultDenied" ? (
-                <svg
-                  className="docAnalysis-iconLg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              ) : (
-                <svg
-                  className="docAnalysis-iconLg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              )}
-            </div>
+            
             <h2 className="docAnalysis-resultTitle">Resultado del Estudio</h2>
             <div
-              className={`docAnalysis-resultStatus ${getResultClass(creditResult.Estado) === "docAnalysis-creditResultDenied" ? "docAnalysis-resultStatusDenied" : "docAnalysis-resultStatusApproved"}`}
+              className={`docAnalysis-resultStatus ${getResultClass(Resultado.Estado) === "docAnalysis-creditResultDenied" ? "docAnalysis-resultStatusDenied" : "docAnalysis-resultStatusApproved"}`}
             >
-              {creditResult.Estado || "No especificado"}
+              {Resultado.Estado || "No especificado"}
             </div>
           </div>
 
@@ -258,11 +234,27 @@ const DocumentAnalisys = () => {
               Detalles del Análisis
             </h3>
             <p className="docAnalysis-resultDetailsText">
-              {creditResult.Motivos ||
-                creditResult.Detalles ||
-                creditResult.Observaciones ||
-                "No se proporcionaron detalles adicionales."}
+              {Resultado.Motivos || "No se proporcionaron detalles adicionales."}
             </p>
+          </div>
+        </div>
+      )}
+
+      {/* Información del Banco */}
+      {Banco && (
+        <div className="docAnalysis-card">
+          <h3 className="docAnalysis-cardTitle">
+            <svg
+              className="docAnalysis-icon"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path d="M4 4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2H4zm10 10a2 2 0 100-4 2 2 0 000 4z" />
+            </svg>
+            Entidad Bancaria
+          </h3>
+          <div className="docAnalysis-bankInfo">
+            {Banco}
           </div>
         </div>
       )}
@@ -295,42 +287,149 @@ const DocumentAnalisys = () => {
         </div>
       )}
 
-      {/* Resumen Análisis Documental */}
-      {Resumen_analisis_documental &&
-        Array.isArray(Resumen_analisis_documental) && (
-          <>
-            <h2 className="docAnalysis-sectionTitle">Análisis de Documentos</h2>
-            <div className="docAnalysis-documentsGrid">
-              {Resumen_analisis_documental.map((doc, index) => (
-                <div key={index} className="docAnalysis-documentCard">
-                  <div className="docAnalysis-documentHeader">
-                    <div className="docAnalysis-documentTitle">
-                      <svg
-                        className="docAnalysis-icon"
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                      >
-                        <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                      {doc?.Documento || "Documento"}
-                    </div>
-                  </div>
-
-                  <div
-                    className={`docAnalysis-statusBadge ${getStatusClass(doc?.Estado)}`}
-                  >
-                    {getStatusIcon(doc?.Estado)}
-                    {doc?.Estado || "N/A"}
-                  </div>
-
-                  <div className="docAnalysis-documentObservations">
-                    {doc?.Observaciones || "Sin observaciones"}
+      {/* Criterios de Evaluación */}
+      {Criterios && Array.isArray(Criterios) && (
+        <>
+          <h2 className="docAnalysis-sectionTitle">Criterios de Evaluación</h2>
+          <div className="docAnalysis-documentsGrid">
+            {Criterios.map((criterio, index) => (
+              <div key={index} className="docAnalysis-documentCard">
+                <div className="docAnalysis-documentHeader">
+                  <div className="docAnalysis-documentTitle">
+                    <svg
+                      className="docAnalysis-icon"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    {criterio.Criterio || "Criterio"}
                   </div>
                 </div>
-              ))}
+
+                <div
+                  className={`docAnalysis-statusBadge ${getStatusClass(criterio.Estado)}`}
+                >
+                  {getStatusIcon(criterio.Estado)}
+                  {criterio.Estado || "N/A"}
+                </div>
+
+                <div className="docAnalysis-documentObservations">
+                  {criterio.Observaciones || "Sin observaciones"}
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* Análisis Crediticio */}
+      {Analisis_crediticio && (
+        <div className="docAnalysis-card">
+          <h3 className="docAnalysis-cardTitle">
+            <svg
+              className="docAnalysis-icon"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+            </svg>
+            Análisis Crediticio
+          </h3>
+          
+          {/* Tarjetas de Crédito */}
+          <div className="docAnalysis-creditSection">
+            <h4 className="docAnalysis-creditSubtitle">Tarjetas de Crédito</h4>
+            <div className="docAnalysis-creditGrid">
+              <div className="docAnalysis-dataField">
+                <div className="docAnalysis-dataLabel">Cantidad</div>
+                <div className="docAnalysis-dataValue">{Analisis_crediticio.Tarjetas_credito.Cantidad}</div>
+              </div>
+              <div className="docAnalysis-dataField">
+                <div className="docAnalysis-dataLabel">Cupo Total</div>
+                <div className="docAnalysis-dataValue">
+                  ${Analisis_crediticio.Tarjetas_credito.Cupo_total.toLocaleString()}
+                </div>
+              </div>
+              <div className="docAnalysis-dataField">
+                <div className="docAnalysis-dataLabel">Cuotas Total</div>
+                <div className="docAnalysis-dataValue">
+                  ${Analisis_crediticio.Tarjetas_credito.Cuotas_total.toLocaleString()}
+                </div>
+              </div>
             </div>
-          </>
-        )}
+            {Analisis_crediticio.Tarjetas_credito.Detalle?.length > 0 && (
+              <div className="docAnalysis-detailList">
+                <h5>Detalle de Tarjetas:</h5>
+                <div className="docAnalysis-detailTable">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Creditor</th>
+                        <th>Límite de Crédito</th>
+                        <th>Términos</th>
+                        <th>ECOA</th>
+                        <th>Cuota</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {Analisis_crediticio.Tarjetas_credito.Detalle.map((tarjeta, index) => (
+                        <tr key={index}>
+                          <td>{tarjeta.Creditor}</td>
+                          <td>${tarjeta.High_Credit_or_Limit?.toLocaleString()}</td>
+                          <td>{tarjeta.Terms}</td>
+                          <td>{tarjeta.ECOA}</td>
+                          <td>${tarjeta.Cuota?.toLocaleString()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Otros Créditos */}
+          <div className="docAnalysis-creditSection">
+            <h4 className="docAnalysis-creditSubtitle">Otros Créditos</h4>
+            <div className="docAnalysis-creditGrid">
+              <div className="docAnalysis-dataField">
+                <div className="docAnalysis-dataLabel">Total</div>
+                <div className="docAnalysis-dataValue">{Analisis_crediticio.Otros_creditos.Total}</div>
+              </div>
+              <div className="docAnalysis-dataField">
+                <div className="docAnalysis-dataLabel">Cuentas Compartidas</div>
+                <div className="docAnalysis-dataValue">{Analisis_crediticio.Otros_creditos.Cuentas_compartidas}</div>
+              </div>
+            </div>
+            {Analisis_crediticio.Otros_creditos.Detalle?.length > 0 && (
+              <div className="docAnalysis-detailList">
+                <h5>Detalle de Otros Créditos:</h5>
+                <div className="docAnalysis-detailTable">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Creditor</th>
+                        <th>Balance</th>
+                        <th>ECOA</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {Analisis_crediticio.Otros_creditos.Detalle.map((credito, index) => (
+                        <tr key={index}>
+                          <td>{credito.Creditor}</td>
+                          <td>${credito.Balance?.toLocaleString()}</td>
+                          <td>{credito.ECOA}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Botón para volver */}
       <button className="docAnalysis-backButton" onClick={() => navigate("/")}>

@@ -72,12 +72,6 @@ body {
   margin-bottom: 1rem;
 }
 
-.docAnalysis-headerSubtitle {
-  font-size: 1.25rem;
-  color: #c4b5fd;
-  max-width: 32rem;
-  margin: 0 auto;
-}
 
 /* Card Styles */
 .docAnalysis-card {
@@ -301,6 +295,115 @@ body {
   line-height: 1.6;
 }
 
+/* Bank Info */
+.docAnalysis-bankInfo {
+  color: #fff;
+  font-size: 1.25rem;
+  font-weight: 600;
+  text-align: center;
+  padding: 1rem;
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 0.75rem;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+/* Credit Analysis Sections */
+.docAnalysis-creditSection {
+  padding: 1.5rem;
+  background: rgba(30, 27, 75, 0.6);
+  border-radius: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.docAnalysis-creditSection:last-child {
+  margin-bottom: 0;
+}
+
+.docAnalysis-creditSubtitle {
+  color: #a78bfa;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.docAnalysis-creditGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.docAnalysis-detailList {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.docAnalysis-detailList h5 {
+  color: #c4b5fd;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.docAnalysis-detailList ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.docAnalysis-detailList li {
+  color: #fff;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.docAnalysis-detailList li:last-child {
+  margin-bottom: 0;
+}
+
+/* Detail Tables */
+.docAnalysis-detailTable {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 1rem;
+}
+
+.docAnalysis-detailTable table {
+  width: 100%;
+  border-collapse: collapse;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 0.5rem;
+}
+
+.docAnalysis-detailTable th {
+  background: rgba(167, 139, 250, 0.1);
+  color: #c4b5fd;
+  font-weight: 600;
+  text-align: left;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.docAnalysis-detailTable td {
+  color: #fff;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.docAnalysis-detailTable tr:last-child td {
+  border-bottom: none;
+}
+
+.docAnalysis-detailTable tr:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
 /* Section Titles */
 .docAnalysis-sectionTitle {
   font-size: 1.875rem;
@@ -315,11 +418,6 @@ body {
   width: 1.5rem;
   height: 1.5rem;
   fill: currentColor;
-}
-
-.docAnalysis-iconLg {
-  width: 1.5rem;
-  height: 1.5rem;
 }
 
 .docAnalysis-iconXl {

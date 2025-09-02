@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import { extractTextsFromAPI, sendToN8nWebhook } from "../services/api";
+import { extractTextsFromAPI, generateAnalysis } from "../services/api";
 import "../css/DocumentProcessor.css";
 import ErrorModal from "./ErrorModal";
 import useErrorModal from "./useErrorModal";
@@ -41,21 +41,39 @@ const DocumentProcessor = () => {
   };
 
   // Función para actualizar el tipo de documento
-  const updateDocumentType = (id, type) => {
-    setUploadedDocuments(prevDocs =>
-      prevDocs.map(doc =>
-        doc.id === id ? { ...doc, type } : doc
-      )
-    );
-    
-    // También actualizar los archivos en formData
-    const updatedFiles = uploadedDocuments
-      .map(doc => doc.id === id ? { ...doc, type } : doc)
-      .filter(doc => doc.type); // Solo incluir documentos con tipo asignado
-      
+  const updateDocumentType = async (id, type) => {
+    // Primero actualizamos uploadedDocuments y esperamos a que termine
+    const updatedDocs = await new Promise(resolve => {
+      setUploadedDocuments(prevDocs => {
+        const newDocs = prevDocs.map(doc => {
+          if (doc.id === id) {
+            // Obtener la extensión del archivo original
+            const extension = doc.file.name.split('.').pop();
+            // Crear el nuevo nombre con el tipo de documento seleccionado
+            const newName = `${type}.${extension}`;
+            // Crear un nuevo objeto File con el nombre actualizado
+            const updatedFile = new File([doc.file], newName, { type: doc.file.type });
+            console.log('Nuevo nombre de archivo:', newName);
+            
+            return {
+              ...doc,
+              type,
+              name: newName,
+              file: updatedFile
+            };
+          }
+          return doc;
+        });
+        resolve(newDocs);
+        return newDocs;
+      });
+    });
+
+    // Ahora actualizamos formData con los documentos actualizados
+    const filteredFiles = updatedDocs.filter(doc => doc.type);
     setFormData(prev => ({
       ...prev,
-      files: updatedFiles,
+      files: filteredFiles,
     }));
   };
 
@@ -138,23 +156,66 @@ const DocumentProcessor = () => {
     }
   };
 
+  // Función para extraer el JSON de la respuesta
+  const extractJsonFromResponse = (response) => {
+    try {
+      // Si la respuesta es un array, tomar el primer elemento
+      const responseData = Array.isArray(response) ? response[0] : response;
+      
+      // Extraer el campo 'response'
+      const responseText = responseData.response;
+      
+      if (!responseText) {
+        throw new Error('No se encontró el campo response');
+      }
+      
+      // Extraer el JSON que está entre ```json y ```
+      const jsonMatch = responseText.match(/```json\s*\n([\s\S]*?)\n```/);
+      
+      if (!jsonMatch) {
+        throw new Error('No se encontró JSON válido en el response');
+      }
+      
+      // Parsear el JSON extraído
+      return JSON.parse(jsonMatch[1]);
+      
+    } catch (error) {
+      console.error('Error al extraer JSON:', error);
+      throw error;
+    }
+  };
+
   // Función principal que procesa los documentos
   const processDocuments = async () => {
     try {
       setIsLoading(true);
       setAnalysisResult(null);
 
-      console.log("Extrayendo textos de documentos...");
-      const extractedData = await extractTextsFromAPI(formData.files);
+      // Obtener los documentos actualizados y filtrados
+      const filesToSend = uploadedDocuments
+        .filter(doc => doc.type)
+        .map(doc => ({
+          ...doc,
+          file: new File([doc.file], doc.name, { type: doc.file.type })
+        }));
 
-      console.log("Enviando datos al webhook...");
-      const webhookResult = await sendToN8nWebhook(
-        formData.email,
-        formData.analysisType,
-        extractedData,
-      );
-      console.log("Proceso completado:", webhookResult);
-      setAnalysisResult(webhookResult);
+      console.log("Archivos a enviar:", filesToSend.map(f => ({ name: f.name, type: f.type })));
+      console.log("Extrayendo textos de documentos...");
+      const extractedData = await extractTextsFromAPI(filesToSend);
+      
+      // Formatear los textos extraídos en la estructura deseada
+      const formattedText = extractedData.results
+        .map(item => `archivo: ${item.original_file}\ncontenido: ${item.extracted_text || ''}\n-----------------------`)
+        .join('\n');
+      
+      console.log("Generando análisis...");
+      const analysisResponse = await generateAnalysis(formattedText);
+      
+      console.log("Extrayendo JSON del análisis...");
+      const analysisResult = extractJsonFromResponse(analysisResponse);
+      
+      console.log("Proceso completado:", analysisResult);
+      setAnalysisResult(analysisResult);
       setIsSuccess(true);
 
       // Limpiar formulario
@@ -182,16 +243,6 @@ const DocumentProcessor = () => {
 
   // Función para manejar el envío del formulario
   const handleSubmit = () => {
-    // Validaciones
-    if (!formData.email ) {
-      showError("email-invalid");
-      return;
-    }
-
-    if (!formData.analysisType) {
-      showError("validation", "Por favor selecciona el tipo de análisis");
-      return;
-    }
 
     if (uploadedDocuments.length === 0) {
       showError("file-upload", "Por favor selecciona al menos un documento");
@@ -218,8 +269,13 @@ const DocumentProcessor = () => {
       "image/png",
     ];
 
-    for (let file of formData.files) {
-      if (!allowedTypes.includes(file.type)) {
+    for (let doc of uploadedDocuments) {
+      const file = doc.file;
+      const fileType = file.type.toLowerCase();
+      const fileExtension = file.name.split('.').pop().toLowerCase();
+      
+      // Verificar tanto el tipo MIME como la extensión del archivo
+      if (!allowedTypes.includes(fileType) && fileExtension !== 'pdf') {
         showError("file-type", `Tipo de archivo no permitido: ${file.name}`);
         return;
       }
