@@ -91,7 +91,7 @@ body {
   align-items: center;
   font-size: 1.5rem;
   font-weight: 700;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.2rem;
 }
 
 .docAnalysis-cardTitle svg {
@@ -306,6 +306,10 @@ body {
   border-radius: 0.75rem;
   border: 1px solid rgba(59, 130, 246, 0.2);
 }
+.docAnalysis-bankDescription{
+
+  margin-bottom: 1rem;
+}
 
 /* Credit Analysis Sections */
 .docAnalysis-creditSection {
@@ -323,6 +327,9 @@ body {
   color: #a78bfa;
   font-size: 1.25rem;
   font-weight: 600;
+  margin-bottom: 0.2rem;
+}
+.docAnalysis-creditDescription{
   margin-bottom: 1rem;
 }
 

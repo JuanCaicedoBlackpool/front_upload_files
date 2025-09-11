@@ -7,12 +7,6 @@ import LoadingModal from "./LoadingModal";
 import { AnalysisContext } from "../context/AnalysisContext";
 
 const DocumentProcessor = () => {
-  const [formData, setFormData] = useState({
-    email: "",
-    analysisType: "",
-    files: [],
-  });
-  
   const [uploadedDocuments, setUploadedDocuments] = useState([]);
   
   const documentTypes = [
@@ -42,48 +36,33 @@ const DocumentProcessor = () => {
 
   // Función para actualizar el tipo de documento
   const updateDocumentType = async (id, type) => {
-    // Primero actualizamos uploadedDocuments y esperamos a que termine
-    const updatedDocs = await new Promise(resolve => {
-      setUploadedDocuments(prevDocs => {
-        const newDocs = prevDocs.map(doc => {
-          if (doc.id === id) {
-            // Obtener la extensión del archivo original
-            const extension = doc.file.name.split('.').pop();
-            // Crear el nuevo nombre con el tipo de documento seleccionado
-            const newName = `${type}.${extension}`;
-            // Crear un nuevo objeto File con el nombre actualizado
-            const updatedFile = new File([doc.file], newName, { type: doc.file.type });
-            console.log('Nuevo nombre de archivo:', newName);
-            
-            return {
-              ...doc,
-              type,
-              name: newName,
-              file: updatedFile
-            };
-          }
-          return doc;
-        });
-        resolve(newDocs);
-        return newDocs;
+    setUploadedDocuments(prevDocs => {
+      return prevDocs.map(doc => {
+        if (doc.id === id) {
+          // Obtener la extensión del archivo original
+          const extension = doc.file.name.split('.').pop();
+          // Crear el nuevo nombre con el tipo de documento seleccionado
+          const newName = `${type}.${extension}`;
+          // Crear un nuevo objeto File con el nombre actualizado
+          const updatedFile = new File([doc.file], newName, { type: doc.file.type });
+          console.log('Nuevo nombre de archivo:', newName);
+          
+          return {
+            ...doc,
+            type,
+            displayName: doc.file.name, // Mantener el nombre original para mostrar
+            name: newName, // Nombre interno para el procesamiento
+            file: updatedFile
+          };
+        }
+        return doc;
       });
     });
-
-    // Ahora actualizamos formData con los documentos actualizados
-    const filteredFiles = updatedDocs.filter(doc => doc.type);
-    setFormData(prev => ({
-      ...prev,
-      files: filteredFiles,
-    }));
   };
 
   // Función para eliminar un documento
   const removeDocument = (id) => {
     setUploadedDocuments(prevDocs => prevDocs.filter(doc => doc.id !== id));
-    setFormData(prev => ({
-      ...prev,
-      files: prev.files.filter(file => file.id !== id),
-    }));
     
     if (uploadedDocuments.length <= 1) {
       setFileStatus("No se han seleccionado archivos.");
@@ -99,15 +78,12 @@ const DocumentProcessor = () => {
       id: Math.random().toString(36).substr(2, 9),
       file,
       name: file.name,
+      displayName: file.name,
       size: file.size,
       type: ""
     }));
 
     setUploadedDocuments(prev => [...prev, ...newDocuments]);
-    setFormData(prev => ({
-      ...prev,
-      files: [...prev.files, ...newDocuments],
-    }));
 
     if (files.length === 0) {
       setFileStatus("No se han seleccionado archivos.");
@@ -142,10 +118,16 @@ const DocumentProcessor = () => {
     setIsDragging(false);
 
     const files = Array.from(e.dataTransfer.files);
-    setFormData((prev) => ({
-      ...prev,
-      files: files,
+    const newDocuments = files.map(file => ({
+      id: Math.random().toString(36).substr(2, 9),
+      file,
+      name: file.name,
+      displayName: file.name,
+      size: file.size,
+      type: ""
     }));
+
+    setUploadedDocuments(prev => [...prev, ...newDocuments]);
 
     if (files.length === 0) {
       setFileStatus("No se han seleccionado archivos.");
@@ -191,7 +173,6 @@ const DocumentProcessor = () => {
       setIsLoading(true);
       setAnalysisResult(null);
 
-      // Obtener los documentos actualizados y filtrados
       const filesToSend = uploadedDocuments
         .filter(doc => doc.type)
         .map(doc => ({
@@ -219,11 +200,7 @@ const DocumentProcessor = () => {
       setIsSuccess(true);
 
       // Limpiar formulario
-      setFormData({
-        email: "",
-        analysisType: "",
-        files: [],
-      });
+      setUploadedDocuments([]);
       setFileStatus("No se han seleccionado archivos.");
 
       // Limpiar el input de archivos
@@ -370,7 +347,7 @@ const DocumentProcessor = () => {
                 {uploadedDocuments.map(doc => (
                   <div key={doc.id} className="document-item">
                     <div className="document-info">
-                      <p className="document-name">{doc.name}</p>
+                      <p className="document-name">{doc.displayName || doc.name}</p>
                       <p className="document-size">{formatFileSize(doc.size)}</p>
                     </div>
                     <select
@@ -413,3 +390,4 @@ const DocumentProcessor = () => {
 };
 
 export default DocumentProcessor;
+

@@ -1,6 +1,6 @@
 // src/services/api.js
 
-const template_prompt = `Eres un analista de crédito que analiza una serie de documentos para determinar la viabilidad crediticia en los bancos Bancolombia y Davivienda. Debes generar 2 reportes separados, uno por banco.
+const template_prompt = `Eres un analista de crédito que analiza una serie de documentos para determinar la viabilidad crediticia en los bancos Bancolombia y Davivienda. Debes generar UN ÚNICO REPORTE UNIFICADO que evalúe la viabilidad para ambos bancos.
 
 ### **CRITERIOS DE VALIDACIÓN**
 
@@ -9,7 +9,7 @@ const template_prompt = `Eres un analista de crédito que analiza una serie de d
 3. **Coherencia de Social Security**: El número debe coincidir entre cédula y formato de preclasificación
 4. **Tipo de crédito**: Verificar si es "Crédito Hipotecario" en el formato de preclasificación
 5. **Gastos familiares**: Deben ser ≤ 50% del salario mensual
-6. **Score crediticio**: 
+6. **Score crediticio**: Válido si el score más alto cumple con AL MENOS UNO de los umbrales:
    - Bancolombia: ≥ 600 puntos
    - Davivienda: ≥ 700 puntos
 7. **Historial negativo**: Charge off = 0 y Collections = 0
@@ -36,20 +36,26 @@ const template_prompt = `Eres un analista de crédito que analiza una serie de d
 **Para otros créditos:**
 - Tomar cuentas en "OPEN ACCOUNTS" donde ACCT TYPE ≠ "REV"
 - Usar valores de "BALANCE"
-- **Para Bancolombia**: Excluir créditos con ECOA = "J" (mostrar por separado como "Cuentas compartidas")
-- **Para Davivienda**: Incluir todos los créditos (ECOA = "J" dividido entre 2)
+- **Mostrar cálculo diferenciado:**
+  * **Bancolombia**: Excluir créditos con ECOA = "J" del total principal
+  * **Davivienda**: Incluir todos los créditos (ECOA = "J" dividido entre 2)
+  * Si NO hay créditos con ECOA = "J", el total es igual para ambos bancos
 - **IMPORTANTE**: La ausencia de créditos compartidos (ECOA = "J") es completamente normal y NO afecta la viabilidad
 
 ### **REGLAS DE VIABILIDAD**
 
 - **VIABLE**: Solo si TODOS los criterios se cumplen
 - **NO VIABLE**: Si cualquier criterio falla
+- **Viabilidad por banco**:
+  * Si score ≥ 600: Viable para Bancolombia
+  * Si score ≥ 700: Viable para Davivienda
+  * Si score ≥ 700: Viable para AMBOS bancos
 
 ### **FORMATO DE SALIDA**
 
 \`\`\`json
 {
-  "Banco": "Bancolombia/Davivienda",
+  "Banco": "Bancolombia/Davivienda/Bancolombia y Davivienda (según viabilidad)",
   "Datos_personales": {
     "Nombres": "",
     "Apellidos": "",
@@ -84,7 +90,7 @@ const template_prompt = `Eres un analista de crédito que analiza una serie de d
     {
       "Criterio": "Score",
       "Estado": "Válido/No Válido",
-      "Observaciones": "Score obtenido vs umbral requerido"
+      "Observaciones": "Score más alto: [valor] ([bureau]). Cumple umbral Bancolombia (≥600): Sí/No. Cumple umbral Davivienda (≥700): Sí/No."
     },
     {
       "Criterio": "Charge off - Collections",
@@ -99,40 +105,42 @@ const template_prompt = `Eres un analista de crédito que analiza una serie de d
       "Cuotas_total": 0,
       "Detalle": [
         {
-          "Creditor": creditor1,
-          "High_Credit_or_Limit": highCreditOrLimit1,
-          "Terms": terms1,
-          "ECOA": ECOA1,
-          "Cuota": cuota1
-        }, {}, ...
+          "Creditor": "creditor1",
+          "High_Credit_or_Limit": 0,
+          "Terms": "terms1",
+          "ECOA": "ECOA1",
+          "Cuota": 0
+        }
       ]
     },
     "Otros_creditos": {
-      "Total": 0,
+      "Total_Bancolombia": 0,
+      "Total_Davivienda": 0,
       "Cuentas_compartidas": 0,
       "Detalle": [
         {
-          "Creditor": creditor1,
-          "Balance": balance1,
-          "ECOA": ECOA1
-        }, {}, ...
+          "Creditor": "creditor1",
+          "Balance": 0,
+          "ECOA": "ECOA1"
+        }
       ]
     }
   },
   "Resultado": {
     "Estado": "Viable/No Viable",
-    "Motivos": "Explicación detallada del resultado"
+    "Motivos": "Explicación detallada del resultado incluyendo viabilidad específica por banco"
   }
 }
 \`\`\`
 
 ### **INSTRUCCIONES CRÍTICAS**
 
-1. **Leer cuidadosamente** la tabla OPEN ACCOUNTS
-2. **Identificar correctamente** qué es REV (tarjeta) vs otros tipos
-3. **Aplicar la regla ECOA = "J"** consistentemente
-4. **Generar DOS reportes separados** (uno para cada banco)
+1. **Generar UN SOLO REPORTE** que incluya evaluación para ambos bancos
+2. **Leer cuidadosamente** la tabla OPEN ACCOUNTS
+3. **Identificar correctamente** qué es REV (tarjeta) vs otros tipos
+4. **Aplicar la regla ECOA = "J"** consistentemente
 5. **Mostrar todos los cálculos** paso a paso en las observaciones
+6. **Cada criterio debe evaluarse de forma INDEPENDIENTE**
 
 ### Documentos a analizar
 `

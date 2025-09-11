@@ -23,6 +23,7 @@ const DocumentAnalisys = () => {
       "sin antecedentes",
       "pagar seguro",
       "viable",
+      "aplica"
     ];
 
     // Estados NEGATIVOS
@@ -35,6 +36,7 @@ const DocumentAnalisys = () => {
       "con antecedentes",
       "no pagar seguro",
       "no viable",
+      "no aplica",
     ];
 
     // Verificar estados negativos primero (más específicos)
@@ -64,6 +66,7 @@ const DocumentAnalisys = () => {
       "con antecedentes",
       "no pagar seguro",
       "no viable",
+      "no aplica",
     ];
 
     return negativeStates.some((negative) => estadoLower.includes(negative))
@@ -240,25 +243,6 @@ const DocumentAnalisys = () => {
         </div>
       )}
 
-      {/* Información del Banco */}
-      {Banco && (
-        <div className="docAnalysis-card">
-          <h3 className="docAnalysis-cardTitle">
-            <svg
-              className="docAnalysis-icon"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-            >
-              <path d="M4 4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2H4zm10 10a2 2 0 100-4 2 2 0 000 4z" />
-            </svg>
-            Entidad Bancaria
-          </h3>
-          <div className="docAnalysis-bankInfo">
-            {Banco}
-          </div>
-        </div>
-      )}
-
       {/* Datos Personales */}
       {Datos_personales && typeof Datos_personales === "object" && (
         <div className="docAnalysis-card">
@@ -283,6 +267,26 @@ const DocumentAnalisys = () => {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Información del Banco */}
+      {Banco && (
+        <div className="docAnalysis-card">
+          <h3 className="docAnalysis-cardTitle">
+            <svg
+              className="docAnalysis-icon"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path d="M4 4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2H4zm10 10a2 2 0 100-4 2 2 0 000 4z" />
+            </svg>
+            Entidad Bancaria
+          </h3>
+          <p className="docAnalysis-bankDescription">Entidad/es bancanrias a las que es viable el credito</p>
+          <div className="docAnalysis-bankInfo">
+            {Banco}
           </div>
         </div>
       )}
@@ -392,14 +396,25 @@ const DocumentAnalisys = () => {
           {/* Otros Créditos */}
           <div className="docAnalysis-creditSection">
             <h4 className="docAnalysis-creditSubtitle">Otros Créditos</h4>
+            <p className="docAnalysis-creditDescription">Créditos diferentes a tarjetas de crédito</p>
             <div className="docAnalysis-creditGrid">
               <div className="docAnalysis-dataField">
-                <div className="docAnalysis-dataLabel">Total</div>
-                <div className="docAnalysis-dataValue">{Analisis_crediticio.Otros_creditos.Total}</div>
+                <div className="docAnalysis-dataLabel">Total Bancolombia</div>
+                <div className="docAnalysis-dataValue">
+                  ${Analisis_crediticio.Otros_creditos.Total_Bancolombia?.toLocaleString()}
+                </div>
+              </div>
+              <div className="docAnalysis-dataField">
+                <div className="docAnalysis-dataLabel">Total Davivienda</div>
+                <div className="docAnalysis-dataValue">
+                  ${Analisis_crediticio.Otros_creditos.Total_Davivienda?.toLocaleString()}
+                </div>
               </div>
               <div className="docAnalysis-dataField">
                 <div className="docAnalysis-dataLabel">Cuentas Compartidas</div>
-                <div className="docAnalysis-dataValue">{Analisis_crediticio.Otros_creditos.Cuentas_compartidas}</div>
+                <div className="docAnalysis-dataValue">
+                  {Analisis_crediticio.Otros_creditos.Cuentas_compartidas}
+                </div>
               </div>
             </div>
             {Analisis_crediticio.Otros_creditos.Detalle?.length > 0 && (
