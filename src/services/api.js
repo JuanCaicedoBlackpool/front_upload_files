@@ -45,7 +45,7 @@ const template_prompt = `Eres un analista de crédito que analiza una serie de d
 ### **REGLAS DE VIABILIDAD**
 
 - **VIABLE**: Solo si TODOS los criterios se cumplen
-- **NO VIABLE**: Si cualquier criterio falla
+- **NO VIABLE**: Si cualquier criterio falla (No válido o No aplica)
 - **Viabilidad por banco**:
   * Si score ≥ 600: Viable para Bancolombia
   * Si score ≥ 700: Viable para Davivienda
@@ -141,6 +141,7 @@ const template_prompt = `Eres un analista de crédito que analiza una serie de d
 4. **Aplicar la regla ECOA = "J"** consistentemente
 5. **Mostrar todos los cálculos** paso a paso en las observaciones
 6. **Cada criterio debe evaluarse de forma INDEPENDIENTE**
+7. **Si un criterio No es válido o  No aplica, el resultado es No Viable**
 
 ### Documentos a analizar
 `
