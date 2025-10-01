@@ -1,6 +1,6 @@
 <template>
   <div class="file-uploader-container rounded-2xl shadow-2xl p-8 w-full max-w-md mx-auto">
-    <h2 class="file-uploader-title text-2xl font-bold mb-4 text-center">Adjunte base de datos de cobranza</h2>
+    <h2 class="file-uploader-title text-2xl font-bold mb-4 text-center">Adjunte base de datos de fidelización</h2>
 
     <div
       class="drop-zone border-2 border-dashed rounded-xl p-6 mb-4 transition-colors duration-200 flex flex-col items-center cursor-pointer"
@@ -59,7 +59,7 @@
   const sent = ref(false);
   const fileInput = ref(null);
 
-  const webhookUrl = 'https://n8n.srv799706.hstgr.cloud/webhook-test/729245fc-8224-481f-987e-8e413db51a3b'
+  const webhookUrl = 'https://n8n.srv799706.hstgr.cloud/webhook-test/8e3492f6-683f-4333-8deb-536552a6a60f'
   function triggerFileInput() {
     fileInput.value.click();
   }
