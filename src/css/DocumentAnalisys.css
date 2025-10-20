@@ -208,7 +208,7 @@ body {
 /* Credit Result */
 .docAnalysis-creditResult {
   border-radius: 1.5rem;
-  padding: 2rem;
+  padding: 0.5rem;
   border: 2px solid;
   margin-bottom: 3rem;
 }
@@ -264,6 +264,16 @@ body {
   border: 1px solid;
 }
 
+.docAnalysis-resultDescription {
+  margin-top: 1rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #c4b5fd;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .docAnalysis-resultStatusDenied {
   background: rgba(239, 68, 68, 0.3);
   color: #fca5a5;
@@ -279,7 +289,6 @@ body {
 .docAnalysis-resultDetails {
   background: rgba(30, 27, 75, 0.6);
   border-radius: 0.75rem;
-  padding: 1.5rem;
   backdrop-filter: blur(4px);
 }
 
@@ -302,7 +311,7 @@ body {
   font-weight: 600;
   text-align: center;
   padding: 1rem;
-  background: rgba(59, 130, 246, 0.1);
+  background: rgba(115, 133, 162, 0.1);
   border-radius: 0.75rem;
   border: 1px solid rgba(59, 130, 246, 0.2);
 }
@@ -474,7 +483,7 @@ body {
   }
 
   .docAnalysis-creditResult {
-    padding: 1.5rem;
+    padding: 0.5rem;
   }
 
   .docAnalysis-backButton {

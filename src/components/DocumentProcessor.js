@@ -4,16 +4,17 @@ import "../css/DocumentProcessor.css";
 import ErrorModal from "./ErrorModal";
 import useErrorModal from "./useErrorModal";
 import LoadingModal from "./LoadingModal";
-import { AnalysisContext } from "../context/AnalysisContext";
+import { AnalysisContext } from "../utils/AnalysisContext";
+import { LANGCHAIN_CONFIG } from "../utils/langchain_config";
 
 const DocumentProcessor = () => {
   const [uploadedDocuments, setUploadedDocuments] = useState([]);
   
   const documentTypes = [
-    "Cédula",
-    "Formato de preclasificación",
-    "Estado de cuenta",
-    "Reporte de crédito"
+    "Cedula",
+    "Formato preclasificacion",
+    "Estado cuenta",
+    "Reporte credito"
   ];
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -138,35 +139,6 @@ const DocumentProcessor = () => {
     }
   };
 
-  // Función para extraer el JSON de la respuesta
-  const extractJsonFromResponse = (response) => {
-    try {
-      // Si la respuesta es un array, tomar el primer elemento
-      const responseData = Array.isArray(response) ? response[0] : response;
-      
-      // Extraer el campo 'response'
-      const responseText = responseData.response;
-      
-      if (!responseText) {
-        throw new Error('No se encontró el campo response');
-      }
-      
-      // Extraer el JSON que está entre ```json y ```
-      const jsonMatch = responseText.match(/```json\s*\n([\s\S]*?)\n```/);
-      
-      if (!jsonMatch) {
-        throw new Error('No se encontró JSON válido en el response');
-      }
-      
-      // Parsear el JSON extraído
-      return JSON.parse(jsonMatch[1]);
-      
-    } catch (error) {
-      console.error('Error al extraer JSON:', error);
-      throw error;
-    }
-  };
-
   // Función principal que procesa los documentos
   const processDocuments = async () => {
     try {
@@ -189,14 +161,29 @@ const DocumentProcessor = () => {
         .map(item => `archivo: ${item.original_file}\ncontenido: ${item.extracted_text || ''}\n-----------------------`)
         .join('\n');
       
-      console.log("Generando análisis...");
-      const analysisResponse = await generateAnalysis(formattedText);
+      let analisys = {}
+      for (const item of extractedData.results) {
+        const file_name = item.original_file.split('.')[0];
+        const chat_prompt = LANGCHAIN_CONFIG[file_name].chatTemplate;
+        const format_instructions = LANGCHAIN_CONFIG[file_name].format_instructions;
+
+        const messages = await chat_prompt.formatMessages({
+          input_text: item.extracted_text, // <-- Aquí sí tienes el texto extraído
+          format_instructions: format_instructions,
+        });
+
+        const contentText = messages[0]?.content || "";
+        console.log(`Generando análisis para ${file_name}...`);
+
+        const analysisResponse = await generateAnalysis(contentText);
+        analisys[file_name] = analysisResponse;
+        console.log(`Proceso para ${file_name} completado. Resultado`,analysisResponse);
+      }
       
-      console.log("Extrayendo JSON del análisis...");
-      const analysisResult = extractJsonFromResponse(analysisResponse);
       
-      console.log("Proceso completado:", analysisResult);
-      setAnalysisResult(analysisResult);
+
+      console.log(JSON.stringify(analisys))
+      setAnalysisResult(analisys);
       setIsSuccess(true);
 
       // Limpiar formulario

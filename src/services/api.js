@@ -17,12 +17,10 @@ const template_prompt = `Eres un analista de crédito que analiza una serie de d
 ### **CÁLCULOS ESPECÍFICOS**
 
 **Para identificar tarjetas de crédito:**
-- Buscar en tabla "OPEN ACCOUNTS" del reporte de crédito
-- Solo cuentas donde ACCT TYPE = "REV" Y el estado sea activo/abierto
-
-**Para calcular cupos de tarjetas:**
-- Sumar valores de "HIGH CREDIT OR LIMIT" de las tarjetas identificadas
-- Si ECOA = "J" (cuenta conjunta), dividir ese valor entre 2
+- Buscar uincamente dentro de la tabla "OPEN ACCOUNTS" del reporte de crédito
+- Identificar y diferencias las columnas: "ECOA", "WHOSE", "CREDITOR", "ACCT TYPE", "HIGH CREDIT OR LIMIT" y "TERMS"
+- Solo cuentas donde ACCT TYPE = ["REV", "OPEN"]
+- Incluye trajetas de credito sin importar su tipo de ECOA
 
 **Para calcular cuotas de tarjetas:**
 - Buscar valores de "TERMS" de las tarjetas identificadas
@@ -31,16 +29,11 @@ const template_prompt = `Eres un analista de crédito que analiza una serie de d
   * Si TERMS contiene solo números seguidos de "$X", extraer el valor X
   * Si TERMS está vacío o contiene "N/A" o texto no numérico, reportar como "0" o "No especificado"
   * Ejemplos: "MIN $79" → $79, "084 $579" → $579, "$0" → $0
-- Si ECOA = "J", dividir ese valor entre 2
 
 **Para otros créditos:**
-- Tomar cuentas en "OPEN ACCOUNTS" donde ACCT TYPE ≠ "REV"
+- Solo cuentas donde ACCT TYPE = [AUTO, INST, MTG]
 - Usar valores de "BALANCE"
-- **Mostrar cálculo diferenciado:**
-  * **Bancolombia**: Excluir créditos con ECOA = "J" del total principal
-  * **Davivienda**: Incluir todos los créditos (ECOA = "J" dividido entre 2)
-  * Si NO hay créditos con ECOA = "J", el total es igual para ambos bancos
-- **IMPORTANTE**: La ausencia de créditos compartidos (ECOA = "J") es completamente normal y NO afecta la viabilidad
+- Incluye trajetas de credito sin importar su tipo de ECOA
 
 ### **REGLAS DE VIABILIDAD**
 
@@ -137,11 +130,10 @@ const template_prompt = `Eres un analista de crédito que analiza una serie de d
 
 1. **Generar UN SOLO REPORTE** que incluya evaluación para ambos bancos
 2. **Leer cuidadosamente** la tabla OPEN ACCOUNTS
-3. **Identificar correctamente** qué es REV (tarjeta) vs otros tipos
-4. **Aplicar la regla ECOA = "J"** consistentemente
-5. **Mostrar todos los cálculos** paso a paso en las observaciones
-6. **Cada criterio debe evaluarse de forma INDEPENDIENTE**
-7. **Si un criterio No es válido o  No aplica, el resultado es No Viable**
+3. **Identificar correctamente** el tipo de cuenta (ACCT TYPE)
+4. **Cada criterio debe evaluarse de forma INDEPENDIENTE**
+5. **Si un criterio No es válido o  No aplica, el resultado es No Viable**
+6. **El formato de salida debe ser JSON válido y completo**
 
 ### Documentos a analizar
 `
@@ -158,7 +150,7 @@ export const extractTextsFromAPI = async (files) => {
   });
 
   // Agregar parámetros adicionales según la definición del endpoint
-  formDataAPI.append("use_genai", "true"); // Parámetro booleano
+  formDataAPI.append("use_genai", "False"); // Parámetro booleano
   formDataAPI.append("max_pages", "10"); // Valor entre 1 y 50
   
   // Mostrar contenido del FormData
@@ -194,8 +186,9 @@ export const extractTextsFromAPI = async (files) => {
   }
 };
 
-export const generateAnalysis = async (extractedText) => {
-  console.log("Texto extraído para análisis:", template_prompt + "\n" + extractedText);
+export const generateAnalysis = async (prompt) => {
+  console.log("Caracteres en el prompt:", prompt.length);
+  
   try {
     const response = await fetch("https://oci-du.tryzone.space/simple-prompt/generate", {
       method: "POST",
@@ -206,8 +199,8 @@ export const generateAnalysis = async (extractedText) => {
       },
       body: JSON.stringify({
         body: {
-          user_message: template_prompt + "\n" + extractedText,
-          max_tokens: 1000,
+          user_message: prompt,
+          max_tokens: 4000,
           temperature: 0.7,
           top_p: 0.75,
           frequency_penalty: 0,
@@ -222,8 +215,15 @@ export const generateAnalysis = async (extractedText) => {
     }
 
     const data = await response.json();
-    console.log("Respuesta del API de análisis:", data);
-    return data;
+    // Limpia los delimitadores de bloque de código Markdown si existen
+    let cleanResponse = data.response;
+    if (typeof cleanResponse === "string") {
+      cleanResponse = cleanResponse.replace(/^```json[\r\n]+|^```[\r\n]+|```$/gim, "").trim();
+    }
+    const data_parsed = JSON.parse(cleanResponse);
+    console.log("Caracteres en la respuesta:", JSON.stringify(data_parsed.length));
+  
+    return data_parsed;
   } catch (error) {
     console.error("Error al generar análisis:", error);
     throw error;

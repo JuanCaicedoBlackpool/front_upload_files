@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { AnalysisContext } from "../context/AnalysisContext";
+import { AnalysisContext } from "../utils/AnalysisContext";
 import { useNavigate } from "react-router-dom";
 import "../css/DocumentAnalisys.css";
 
@@ -7,206 +7,162 @@ const DocumentAnalisys = () => {
   const { analysisResult } = useContext(AnalysisContext);
   const navigate = useNavigate();
 
-  // Función para determinar el estado basado en palabras clave
-  const getStatusClass = (estado) => {
-    if (!estado) return "docAnalysis-statusNeutral";
+  // --- Validation Functions ---
 
-    const estadoLower = estado.toLowerCase();
+  const checkNameConsistency = (cedula, preclasificacion) => {
+    return cedula?.nombre?.trim() === preclasificacion?.nombre?.trim();
+  };
 
-    // Estados POSITIVOS
-    const positiveKeywords = [
-      "apto",
-      "válido",
-      "valido",
-      "consistente",
-      "aprobado",
-      "sin antecedentes",
-      "pagar seguro",
-      "viable",
-      "aplica"
-    ];
+  const checkIdConsistency = (cedula, preclasificacion) => {
+    return cedula?.identificacion === preclasificacion?.identificacion_cc;
+  };
 
-    // Estados NEGATIVOS
-    const negativeKeywords = [
-      "no apto",
-      "no válido",
-      "no valido",
-      "inconsistente",
-      "no aprobado",
-      "con antecedentes",
-      "no pagar seguro",
-      "no viable",
-      "no aplica",
-    ];
+  const checkSocialSecurity = (preclasificacion) => {
+    return preclasificacion?.social_security && preclasificacion.social_security.trim() !== '';
+  };
 
-    // Verificar estados negativos primero (más específicos)
-    if (negativeKeywords.some((keyword) => estadoLower.includes(keyword))) {
-      return "docAnalysis-statusNegative";
-    }
+  const checkCreditType = (preclasificacion) => {
+    return preclasificacion?.credito_hipotecario === "True";
+  };
 
-    // Luego verificar estados positivos
-    if (positiveKeywords.some((keyword) => estadoLower.includes(keyword))) {
-      return "docAnalysis-statusPositive";
-    }
+  const checkFamilyExpenses = (preclasificacion) => {
+    const salario = parseFloat(preclasificacion?.salario_mensual);
+    const gastos = parseFloat(preclasificacion?.gastos_familiares);
+    if (isNaN(salario) || isNaN(gastos) || salario === 0) return false;
+    return (gastos / salario) <= 0.5;
+  };
 
-    // Por defecto, neutral
+  const checkCreditScore = (reporte) => {
+    const score = parseInt(reporte?.score, 10);
+    if (isNaN(score)) return { bancolombia: false, davivienda: false };
+    return {
+      bancolombia: score >= 600,
+      davivienda: score >= 700,
+    };
+  };
+
+  const checkChargeOff = (reporte) => {
+    if (!reporte) return false;
+    const chargeOff = parseInt(reporte.charge_off, 10);
+    return chargeOff === 0;
+  };
+
+  const checkCollections = (reporte) => {
+    if (!reporte) return false;
+    const collections = parseInt(reporte.collections, 10);
+    return collections === 0;
+  };
+
+  // --- Helper Functions for UI ---
+
+  const formatName = (name) => {
+    if (!name) return "No especificado";
+    return name
+      .toLowerCase()
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
+
+  const getStatusClass = (isValid) => {
+    if (isValid === true) return "docAnalysis-statusPositive";
+    if (isValid === false) return "docAnalysis-statusNegative";
     return "docAnalysis-statusNeutral";
   };
 
-  // Función para determinar si el resultado general es positivo o negativo
-  const getResultClass = (estado) => {
-    if (!estado) return "docAnalysis-creditResultApproved";
-
-    const estadoLower = estado.toLowerCase();
-    const negativeStates = [
-      "no apto",
-      "no aprobado",
-      "rechazado",
-      "denegado",
-      "con antecedentes",
-      "no pagar seguro",
-      "no viable",
-      "no aplica",
-    ];
-
-    return negativeStates.some((negative) => estadoLower.includes(negative))
-      ? "docAnalysis-creditResultDenied"
-      : "docAnalysis-creditResultApproved";
-  };
-
-  // Función para obtener el icono apropiado
-  const getStatusIcon = (estado) => {
-    const statusClass = getStatusClass(estado);
-
+  const getStatusIcon = (isValid) => {
+    const statusClass = getStatusClass(isValid);
     if (statusClass === "docAnalysis-statusNegative") {
-      return (
-        <svg
-          className="docAnalysis-icon"
-          viewBox="0 0 24 24"
-          fill="currentColor"
-          style={{ marginRight: "0.5rem" }}
-        >
-          <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-        </svg>
-      );
-    } else if (statusClass === "docAnalysis-statusPositive") {
-      return (
-        <svg
-          className="docAnalysis-icon"
-          viewBox="0 0 24 24"
-          fill="currentColor"
-          style={{ marginRight: "0.5rem" }}
-        >
-          <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      );
-    } else {
-      return (
-        <svg
-          className="docAnalysis-icon"
-          viewBox="0 0 24 24"
-          fill="currentColor"
-          style={{ marginRight: "0.5rem" }}
-        >
-          <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      );
+      return <svg className="docAnalysis-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>;
     }
+    if (statusClass === "docAnalysis-statusPositive") {
+      return <svg className="docAnalysis-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
+    }
+    return <svg className="docAnalysis-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
   };
 
-  // Verificación más robusta de los datos
-  if (!analysisResult) {
+  if (!analysisResult || Object.keys(analysisResult).length === 0) {
     return (
       <div className="docAnalysis-container">
         <div className="docAnalysis-header">
-          <div className="docAnalysis-headerContent">
-            <div className="docAnalysis-headerIcon">
-              <svg
-                className="docAnalysis-iconXl"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <h1 className="docAnalysis-headerTitle">Análisis de Estudio</h1>
-            <p className="docAnalysis-headerSubtitle">
-              No hay datos de análisis para mostrar. Por favor, realiza un nuevo
-              análisis.
-            </p>
-          </div>
+          <h1 className="docAnalysis-headerTitle">Análisis de Estudio</h1>
+          <p className="docAnalysis-headerSubtitle">No hay datos de análisis para mostrar.</p>
         </div>
       </div>
     );
   }
 
-  // Determinar si analysisResult es un array o un objeto
-  let analysis;
-  if (Array.isArray(analysisResult)) {
-    if (analysisResult.length === 0) {
-      return (
-        <div className="docAnalysis-container">
-          <div className="docAnalysis-header">
-            <div className="docAnalysis-headerContent">
-              <div className="docAnalysis-headerIcon">
-                <svg
-                  className="docAnalysis-iconXl"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-              </div>
-              <h1 className="docAnalysis-headerTitle">Sin Datos</h1>
-              <p className="docAnalysis-headerSubtitle">
-                No hay datos de análisis para mostrar.
-              </p>
-            </div>
-          </div>
-        </div>
-      );
-    }
-    analysis = analysisResult[0];
+  const { "Cedula": cedula, "Formato preclasificacion": preclasificacion, "Reporte credito": reporteCredito } = analysisResult;
+
+  // --- Perform Validations ---
+  const isNameConsistent = checkNameConsistency(cedula, preclasificacion);
+  const isIdConsistent = checkIdConsistency(cedula, preclasificacion);
+  const hasSocialSecurity = checkSocialSecurity(preclasificacion);
+  const isMortgageCredit = checkCreditType(preclasificacion);
+  const areExpensesValid = checkFamilyExpenses(preclasificacion);
+  const scoreValidation = checkCreditScore(reporteCredito);
+  const hasNoChargeOff = checkChargeOff(reporteCredito);
+  const hasNoCollections = checkCollections(reporteCredito);
+
+  const isScoreValid = scoreValidation.bancolombia || scoreValidation.davivienda;
+  let scoreObs = `Score: ${reporteCredito?.score || 'N/A'}. `;
+  const validBanks = [];
+  if (scoreValidation.bancolombia) validBanks.push("Bancolombia");
+  if (scoreValidation.davivienda) validBanks.push("Davivienda");
+
+  if (validBanks.length > 0) {
+    scoreObs += `Válido para ${validBanks.join(', ')}.`;
   } else {
-    analysis = analysisResult;
+    scoreObs += 'No cumple el mínimo para ninguna entidad.';
   }
 
-  // Verificar que el objeto analysis existe y tiene las propiedades esperadas
-  if (!analysis || typeof analysis !== "object") {
-    return (
-      <div className="docAnalysis-container">
-        <div className="docAnalysis-header">
-          <div className="docAnalysis-headerContent">
-            <div className="docAnalysis-headerIcon">
-              <svg
-                className="docAnalysis-iconXl"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-            </div>
-            <h1 className="docAnalysis-headerTitle">Error de Formato</h1>
-            <p className="docAnalysis-headerSubtitle">
-              Los datos de análisis no tienen el formato correcto.
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const evaluationCriteria = [
+    { Criterio: "Coherencia de nombres", Estado: isNameConsistent, Observaciones: isNameConsistent ? "Nombres coinciden" : "Nombres no coinciden" },
+    { Criterio: "Coherencia de cédula", Estado: isIdConsistent, Observaciones: isIdConsistent ? "Cédulas coinciden" : "Cédulas no coinciden" },
+    { Criterio: "Presencia de Social Security", Estado: hasSocialSecurity, Observaciones: hasSocialSecurity ? "SSN presente" : "SSN ausente" },
+    { Criterio: "Tipo de crédito", Estado: isMortgageCredit, Observaciones: isMortgageCredit ? "Crédito Hipotecario" : "No es Crédito Hipotecario" },
+    { Criterio: "Gastos familiares", Estado: areExpensesValid, Observaciones: areExpensesValid ? "Gastos familiares ≤ 50% del salario" : "Gastos familiares ≥ 50% del salario" },
+    { Criterio: "Score crediticio", Estado: isScoreValid, Observaciones: scoreObs },
+    { Criterio: "Charge Off", Estado: hasNoChargeOff, Observaciones: hasNoChargeOff ? "Sin Charge Off" : `Presenta Charge Off: ${reporteCredito?.charge_off}` },
+    { Criterio: "Collections", Estado: hasNoCollections, Observaciones: hasNoCollections ? "Sin Collections" : `Presenta Collections: ${reporteCredito?.collections}` },
+  ];
 
-  const {
-    Banco,
-    Datos_personales,
-    Criterios,
-    Analisis_crediticio,
-    Resultado,
-  } = analysis;
+  const overallResult = evaluationCriteria.every(c => c.Estado);
+
+  // --- Procesamiento de Datos para Análisis Crediticio ---
+  const tarjetasDeCredito = reporteCredito?.open_accounts?.filter(
+    acc => acc.acct_type === 'REV' || acc.acct_type === 'OPEN'
+  ) || [];
+
+  const otrosCreditos = reporteCredito?.open_accounts?.filter(
+    acc => acc.acct_type !== 'REV' && acc.acct_type !== 'OPEN'
+  ) || [];
+
+  // Cálculos para Tarjetas de Crédito
+  const cupoTotalTarjetas = tarjetasDeCredito.reduce((sum, tarjeta) => {
+    const limit = parseFloat(tarjeta.high_score_limit) || 0;
+    return sum + (tarjeta.ecoa === 'J' ? limit / 2 : limit);
+  }, 0);
+  const cuotasTotalTarjetas = tarjetasDeCredito.reduce((sum, tarjeta) => {
+    const terms = parseFloat(tarjeta.terms) || 0;
+    return sum + (tarjeta.ecoa === 'J' ? terms / 2 : terms);
+  }, 0);
+
+  // Cálculos para Otros Créditos
+  const totalOtrosCreditos = otrosCreditos.reduce((sum, credito) => {
+    const terms = parseFloat(credito.terms) || 0;
+    return sum + terms;
+  }, 0);
+  const totalCompartidosOtrosCreditos = otrosCreditos
+    .filter(c => c.ecoa === 'J')
+    .reduce((sum, credito) => {
+      const terms = parseFloat(credito.terms) || 0;
+      return sum + terms;
+    }, 0);
+
 
   return (
     <div className="docAnalysis-container">
-      {/* Header */}
       <div className="docAnalysis-header">
         <div className="docAnalysis-headerContent">
           <div className="logo-container">
@@ -217,62 +173,38 @@ const DocumentAnalisys = () => {
         </div>
       </div>
 
-      {/* Resultado del Estudio de Crédito */}
-      {Resultado && (
-        <div
-          className={`docAnalysis-creditResult ${getResultClass(Resultado.Estado)}`}
-        >
-          <div className="docAnalysis-resultHeader">
-            
-            <h2 className="docAnalysis-resultTitle">Resultado del Estudio</h2>
-            <div
-              className={`docAnalysis-resultStatus ${getResultClass(Resultado.Estado) === "docAnalysis-creditResultDenied" ? "docAnalysis-resultStatusDenied" : "docAnalysis-resultStatusApproved"}`}
-            >
-              {Resultado.Estado || "No especificado"}
-            </div>
+      <div className={`docAnalysis-creditResult ${overallResult ? "docAnalysis-creditResultApproved" : "docAnalysis-creditResultDenied"}`}>
+        <div className="docAnalysis-resultHeader">
+          <h2 className="docAnalysis-resultTitle">Resultado del Estudio</h2>
+          <div className={`docAnalysis-resultStatus ${!overallResult ? "docAnalysis-resultStatusDenied" : "docAnalysis-resultStatusApproved"}`}>
+            {overallResult ? "Aprobado" : "Rechazado"}
           </div>
-
-          <div className="docAnalysis-resultDetails">
-            <h3 className="docAnalysis-resultDetailsTitle">
-              Detalles del Análisis
-            </h3>
-            <p className="docAnalysis-resultDetailsText">
-              {Resultado.Motivos || "No se proporcionaron detalles adicionales."}
-            </p>
-          </div>
+          <p className="docAnalysis-resultDescription">
+            {overallResult
+              ? "¡Felicidades! El estudio de crédito ha sido aprobado. El cliente cumple con todos los criterios de evaluación."
+              : "El estudio de crédito ha sido rechazado. El cliente no cumple con uno o más de los criterios de evaluación. Por favor revise los detalles a continuación."}
+          </p>
         </div>
-      )}
+      </div>
 
-      {/* Datos Personales */}
-      {Datos_personales && typeof Datos_personales === "object" && (
+      {cedula && (
         <div className="docAnalysis-card">
-          <h3 className="docAnalysis-cardTitle">
-            <svg
-              className="docAnalysis-icon"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-            >
-              <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-            Datos Personales
-          </h3>
+          <h3 className="docAnalysis-cardTitle">Datos Personales</h3>
           <div className="docAnalysis-personalDataGrid">
-            {Object.entries(Datos_personales).map(([key, value]) => (
-              <div key={key} className="docAnalysis-dataField">
-                <div className="docAnalysis-dataLabel">
-                  {key.replace(/_/g, " ")}
-                </div>
-                <div className="docAnalysis-dataValue">
-                  {value || "No especificado"}
-                </div>
-              </div>
-            ))}
+            <div className="docAnalysis-dataField">
+              <div className="docAnalysis-dataLabel">Nombre</div>
+              <div className="docAnalysis-dataValue">{formatName(cedula.nombre)}</div>
+            </div>
+            <div className="docAnalysis-dataField">
+              <div className="docAnalysis-dataLabel">Identificación</div>
+              <div className="docAnalysis-dataValue">{cedula.identificacion || "No especificado"}</div>
+            </div>
           </div>
         </div>
       )}
 
       {/* Información del Banco */}
-      {Banco && (
+      {overallResult && validBanks.length > 0 && (
         <div className="docAnalysis-card">
           <h3 className="docAnalysis-cardTitle">
             <svg
@@ -284,51 +216,35 @@ const DocumentAnalisys = () => {
             </svg>
             Entidad Bancaria
           </h3>
-          <p className="docAnalysis-bankDescription">Entidad/es bancanrias a las que es viable el credito</p>
+          <p className="docAnalysis-bankDescription">Entidad/es bancarias a las que es viable el credito</p>
           <div className="docAnalysis-bankInfo">
-            {Banco}
+            {validBanks.join(', ')}
           </div>
         </div>
       )}
 
-      {/* Criterios de Evaluación */}
-      {Criterios && Array.isArray(Criterios) && (
-        <>
-          <h2 className="docAnalysis-sectionTitle">Criterios de Evaluación</h2>
-          <div className="docAnalysis-documentsGrid">
-            {Criterios.map((criterio, index) => (
-              <div key={index} className="docAnalysis-documentCard">
-                <div className="docAnalysis-documentHeader">
-                  <div className="docAnalysis-documentTitle">
-                    <svg
-                      className="docAnalysis-icon"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                    >
-                      <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    {criterio.Criterio || "Criterio"}
-                  </div>
-                </div>
-
-                <div
-                  className={`docAnalysis-statusBadge ${getStatusClass(criterio.Estado)}`}
-                >
-                  {getStatusIcon(criterio.Estado)}
-                  {criterio.Estado || "N/A"}
-                </div>
-
-                <div className="docAnalysis-documentObservations">
-                  {criterio.Observaciones || "Sin observaciones"}
-                </div>
+      <h2 className="docAnalysis-sectionTitle">Criterios de Evaluación</h2>
+      <div className="docAnalysis-documentsGrid">
+        {evaluationCriteria.map((criterio, index) => (
+          <div key={index} className="docAnalysis-documentCard">
+            <div className="docAnalysis-documentHeader">
+              <div className="docAnalysis-documentTitle">
+                {criterio.Criterio}
               </div>
-            ))}
+            </div>
+            <div className={`docAnalysis-statusBadge ${getStatusClass(criterio.Estado)}`}>
+              {getStatusIcon(criterio.Estado)}
+              {criterio.Estado ? "Cumple" : "No Cumple"}
+            </div>
+            <div className="docAnalysis-documentObservations">
+              {criterio.Observaciones}
+            </div>
           </div>
-        </>
-      )}
+        ))}
+      </div>
 
       {/* Análisis Crediticio */}
-      {Analisis_crediticio && (
+      {reporteCredito && reporteCredito.open_accounts && (
         <div className="docAnalysis-card">
           <h3 className="docAnalysis-cardTitle">
             <svg
@@ -347,22 +263,22 @@ const DocumentAnalisys = () => {
             <div className="docAnalysis-creditGrid">
               <div className="docAnalysis-dataField">
                 <div className="docAnalysis-dataLabel">Cantidad</div>
-                <div className="docAnalysis-dataValue">{Analisis_crediticio.Tarjetas_credito.Cantidad}</div>
+                <div className="docAnalysis-dataValue">{tarjetasDeCredito.length}</div>
               </div>
               <div className="docAnalysis-dataField">
                 <div className="docAnalysis-dataLabel">Cupo Total</div>
                 <div className="docAnalysis-dataValue">
-                  ${Analisis_crediticio.Tarjetas_credito.Cupo_total.toLocaleString()}
+                  ${cupoTotalTarjetas.toLocaleString()}
                 </div>
               </div>
               <div className="docAnalysis-dataField">
                 <div className="docAnalysis-dataLabel">Cuotas Total</div>
                 <div className="docAnalysis-dataValue">
-                  ${Analisis_crediticio.Tarjetas_credito.Cuotas_total.toLocaleString()}
+                  ${cuotasTotalTarjetas.toLocaleString()}
                 </div>
               </div>
             </div>
-            {Analisis_crediticio.Tarjetas_credito.Detalle?.length > 0 && (
+            {tarjetasDeCredito.length > 0 && (
               <div className="docAnalysis-detailList">
                 <h5>Detalle de Tarjetas:</h5>
                 <div className="docAnalysis-detailTable">
@@ -371,19 +287,17 @@ const DocumentAnalisys = () => {
                       <tr>
                         <th>Creditor</th>
                         <th>Límite de Crédito</th>
-                        <th>Términos</th>
-                        <th>ECOA</th>
                         <th>Cuota</th>
+                        <th>ECOA</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {Analisis_crediticio.Tarjetas_credito.Detalle.map((tarjeta, index) => (
+                      {tarjetasDeCredito.map((tarjeta, index) => (
                         <tr key={index}>
-                          <td>{tarjeta.Creditor}</td>
-                          <td>${tarjeta.High_Credit_or_Limit?.toLocaleString()}</td>
-                          <td>{tarjeta.Terms}</td>
-                          <td>{tarjeta.ECOA}</td>
-                          <td>${tarjeta.Cuota?.toLocaleString()}</td>
+                          <td>{tarjeta.creditor}</td>
+                          <td>${tarjeta.high_score_limit?.toLocaleString()}</td>
+                          <td>${tarjeta.terms?.toLocaleString()}</td>
+                          <td>{tarjeta.ecoa}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -398,26 +312,20 @@ const DocumentAnalisys = () => {
             <h4 className="docAnalysis-creditSubtitle">Otros Créditos</h4>
             <p className="docAnalysis-creditDescription">Créditos diferentes a tarjetas de crédito</p>
             <div className="docAnalysis-creditGrid">
-              <div className="docAnalysis-dataField">
-                <div className="docAnalysis-dataLabel">Total Bancolombia</div>
+               <div className="docAnalysis-dataField">
+                <div className="docAnalysis-dataLabel">Cuota Total</div>
                 <div className="docAnalysis-dataValue">
-                  ${Analisis_crediticio.Otros_creditos.Total_Bancolombia?.toLocaleString()}
+                  ${totalOtrosCreditos.toLocaleString()}
                 </div>
               </div>
               <div className="docAnalysis-dataField">
-                <div className="docAnalysis-dataLabel">Total Davivienda</div>
+                <div className="docAnalysis-dataLabel">Cuota Compartida</div>
                 <div className="docAnalysis-dataValue">
-                  ${Analisis_crediticio.Otros_creditos.Total_Davivienda?.toLocaleString()}
-                </div>
-              </div>
-              <div className="docAnalysis-dataField">
-                <div className="docAnalysis-dataLabel">Cuentas Compartidas</div>
-                <div className="docAnalysis-dataValue">
-                  {Analisis_crediticio.Otros_creditos.Cuentas_compartidas}
+                  ${totalCompartidosOtrosCreditos.toLocaleString()}
                 </div>
               </div>
             </div>
-            {Analisis_crediticio.Otros_creditos.Detalle?.length > 0 && (
+            {otrosCreditos.length > 0 && (
               <div className="docAnalysis-detailList">
                 <h5>Detalle de Otros Créditos:</h5>
                 <div className="docAnalysis-detailTable">
@@ -426,15 +334,17 @@ const DocumentAnalisys = () => {
                       <tr>
                         <th>Creditor</th>
                         <th>Balance</th>
+                        <th>Cuota</th>
                         <th>ECOA</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {Analisis_crediticio.Otros_creditos.Detalle.map((credito, index) => (
+                      {otrosCreditos.map((credito, index) => (
                         <tr key={index}>
-                          <td>{credito.Creditor}</td>
-                          <td>${credito.Balance?.toLocaleString()}</td>
-                          <td>{credito.ECOA}</td>
+                          <td>{credito.creditor}</td>
+                          <td>${credito.high_score_limit?.toLocaleString()}</td>
+                          <td>${credito.terms?.toLocaleString()}</td>
+                          <td>{credito.ecoa}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -446,7 +356,6 @@ const DocumentAnalisys = () => {
         </div>
       )}
 
-      {/* Botón para volver */}
       <button className="docAnalysis-backButton" onClick={() => navigate("/")}>
         ← Nuevo Análisis
       </button>
