@@ -205,7 +205,7 @@ const DocumentProcessor = () => {
         <h1 className="title">Análisis de Documentos</h1>
         <div className="logo-container">
           <img src="/3.png" alt="logo blackpool" className="logo" />
-          <img src="/Oracle-Logo-1.png" alt="logo oracle" className="logo" />
+          <img src="/KPMG_logo.svg.png" alt="logo KMPG" className="logo" />
         </div>
 
         <p className="subtitle">
